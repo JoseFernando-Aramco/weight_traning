@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#131518">
+<title>쇠질로그 — 상체 집중 5분할</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --bg:#131518; --panel:#1c1f24; --panel-2:#22262c; --line:#2e333b;
+    --ink:#eef1f4; --ink-dim:#9aa3ad; --ink-faint:#6b7480;
+    /* IPF 원판 컬러 — 요일 코드 */
+    --plate-red:#e2493b; --plate-blue:#3f7fd4; --plate-yellow:#e8b33a;
+    --plate-green:#3fa96c; --plate-white:#d8dde2;
+    --amber:#ffb020; --done:#3fa96c;
+    --radius:14px;
+    --tap:48px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html{font-size:16px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
+  }
+  .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+
+  /* ── 헤더 ─────────────────────────── */
+  header{padding:20px 16px 8px; max-width:640px; margin:0 auto}
+  .brand{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+  .brand h1{margin:0; font-size:1.35rem; font-weight:800; letter-spacing:-.02em}
+  .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600}
+  .datebar{display:flex; align-items:center; gap:8px; margin-top:10px}
+  .datebar input[type=date]{
+    background:var(--panel); border:1px solid var(--line); color:var(--ink);
+    border-radius:10px; padding:10px 12px; font:inherit; min-height:var(--tap);
+  }
+  .weekchip{margin-left:auto; font-size:.75rem; color:var(--ink-dim); background:var(--panel);
+    border:1px solid var(--line); padding:8px 12px; border-radius:999px; font-weight:700}
+
+  /* ── 요일 탭: 원판 컬러 ───────────── */
+  nav{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:12px 16px; max-width:640px; margin:0 auto}
+  nav button{
+    min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink-dim); font:inherit; font-weight:800; font-size:.85rem;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer;
+  }
+  nav button .dot{width:10px; height:10px; border-radius:50%; background:var(--c,transparent);
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+  nav button.on{background:var(--panel-2); color:var(--ink); border-color:var(--c,var(--line));
+    box-shadow:0 0 0 1px var(--c,transparent) inset}
+  nav button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+
+  main{max-width:640px; margin:0 auto; padding:0 16px}
+
+  /* ── 데이 요약 ─────────────────────── */
+  .dayhead{display:flex; align-items:center; gap:10px; margin:10px 0 4px}
+  .dayhead .plate{width:16px; height:16px; border-radius:50%; background:var(--c);
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,.3)}
+  .dayhead h2{margin:0; font-size:1.1rem; font-weight:800}
+  .dayhead .time{margin-left:auto; color:var(--ink-faint); font-size:.8rem; font-weight:700}
+  .daynote{color:var(--ink-dim); font-size:.85rem; margin:2px 0 14px; line-height:1.5}
+
+  /* ── 워밍업 ───────────────────────── */
+  details.warm{background:var(--panel); border:1px dashed var(--line); border-radius:var(--radius);
+    margin-bottom:14px; overflow:hidden}
+  details.warm summary{
+    list-style:none; cursor:pointer; padding:14px 16px; font-weight:800; font-size:.9rem;
+    color:var(--amber); display:flex; align-items:center; gap:8px; min-height:var(--tap);
+  }
+  details.warm summary::-webkit-details-marker{display:none}
+  details.warm summary::after{content:"▾"; margin-left:auto; transition:transform .2s}
+  details.warm[open] summary::after{transform:rotate(180deg)}
+  details.warm .body{padding:0 16px 14px; color:var(--ink-dim); font-size:.88rem; line-height:1.7}
+  details.warm .body b{color:var(--ink)}
+
+  /* ── 종목 카드 ─────────────────────── */
+  .ex{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    margin-bottom:14px; overflow:hidden}
+  .ex-head{padding:14px 16px 10px; display:flex; align-items:flex-start; gap:10px}
+  .ex-head .order{color:var(--c,var(--ink-faint)); font-weight:900; font-size:.95rem; min-width:1.4em}
+  .ex-head .name{font-weight:800; font-size:1rem; line-height:1.35}
+  .ex-head .meta{color:var(--ink-dim); font-size:.8rem; margin-top:3px; line-height:1.5}
+  .ex-head .rest{margin-left:auto; text-align:right; color:var(--ink-faint); font-size:.75rem; font-weight:700; white-space:nowrap}
+  .ex-head .rest b{display:block; color:var(--ink-dim); font-size:.9rem}
+  .cue{margin:0 16px 10px; padding:9px 12px; background:var(--panel-2); border-radius:10px;
+    color:var(--ink-dim); font-size:.82rem; line-height:1.55}
+
+  /* 세트 행 */
+  .sets{padding:4px 12px 14px}
+  .setrow{display:grid; grid-template-columns:2.2em 1fr 1fr var(--tap); gap:8px; align-items:center;
+    padding:5px 0}
+  .setrow .idx{color:var(--ink-faint); font-weight:800; font-size:.85rem; text-align:center}
+  .field{position:relative}
+  .field input{
+    width:100%; min-height:var(--tap); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:10px; color:var(--ink); font:inherit; font-weight:700; font-size:1rem;
+    text-align:center; padding:8px 8px 8px 8px;
+  }
+  .field input:focus{outline:2px solid var(--amber); outline-offset:-1px; border-color:var(--amber)}
+  .field .unit{position:absolute; right:9px; top:50%; transform:translateY(-50%);
+    font-size:.68rem; color:var(--ink-faint); font-weight:700; pointer-events:none}
+  .chk{
+    min-width:var(--tap); min-height:var(--tap); border-radius:10px; border:1px solid var(--line);
+    background:var(--panel-2); color:var(--ink-faint); font-size:1.15rem; font-weight:900; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chk.on{background:var(--done); border-color:var(--done); color:#0d1410}
+  .chk:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+  .setrow.done input{color:var(--ink-dim)}
+
+  /* 진행 배지 */
+  .prog{margin:2px 16px 14px; padding:10px 12px; border-radius:10px; font-size:.85rem; font-weight:700;
+    display:none; line-height:1.5}
+  .prog.hit{display:block; background:rgba(63,169,108,.12); color:#7fd4a4; border:1px solid rgba(63,169,108,.35)}
+  .prog.keep{display:block; background:rgba(255,176,32,.08); color:var(--amber); border:1px solid rgba(255,176,32,.3)}
+
+  /* ── 하단 타이머 바 ─────────────────── */
+  .timerbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:linear-gradient(180deg, rgba(19,21,24,0) 0%, var(--bg) 22%);
+    padding:18px 16px calc(14px + env(safe-area-inset-bottom));
+    display:flex; justify-content:center; pointer-events:none;
+  }
+  .timer{
+    pointer-events:auto; width:100%; max-width:608px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:16px;
+    display:flex; align-items:center; gap:14px; padding:12px 16px;
+    box-shadow:0 -6px 24px rgba(0,0,0,.4);
+  }
+  .timer .label{font-size:.78rem; color:var(--ink-dim); font-weight:700; line-height:1.35}
+  .timer .clock{font-size:2rem; font-weight:900; letter-spacing:.01em; margin-left:auto}
+  .timer .clock.warn{color:var(--amber)}
+  .timer .clock.zero{color:var(--done)}
+  .timer button{
+    min-height:var(--tap); min-width:var(--tap); padding:0 16px; border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink); font:inherit; font-weight:800; cursor:pointer;
+  }
+  .timer.idle .label{color:var(--ink-faint)}
+  .timer.idle .clock{color:var(--ink-faint); font-size:1.2rem; font-weight:700}
+
+  /* ── 기록 화면 ─────────────────────── */
+  .histcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:10px}
+  .histcard .top{display:flex; align-items:center; gap:10px; font-weight:800}
+  .histcard .top .dot{width:10px; height:10px; border-radius:50%; background:var(--c)}
+  .histcard .top .d{margin-left:auto; color:var(--ink-faint); font-size:.8rem; font-weight:700}
+  .histcard .stats{color:var(--ink-dim); font-size:.85rem; margin-top:6px; line-height:1.6}
+  .histcard .del{margin-top:8px; background:none; border:none; color:var(--ink-faint);
+    font:inherit; font-size:.78rem; font-weight:700; cursor:pointer; padding:8px 0; min-height:var(--tap)}
+  .empty{color:var(--ink-faint); text-align:center; padding:48px 16px; font-size:.9rem; line-height:1.7}
+
+  .toolrow{display:flex; gap:8px; margin:16px 0 32px}
+  .toolrow button{
+    flex:1; min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink-dim); font:inherit; font-weight:700; font-size:.85rem; cursor:pointer;
+  }
+
+  .rules{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin:4px 0 32px; color:var(--ink-dim); font-size:.85rem; line-height:1.75}
+  .rules b{color:var(--ink)}
+  .rules h3{margin:0 0 6px; font-size:.9rem; color:var(--amber)}
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>쇠질로그</h1>
+    <span class="sub">상체 집중 5분할 · 하체 유지 · 가슴 우선</span>
+  </div>
+  <div class="datebar">
+    <input type="date" id="dateInput" aria-label="운동 날짜">
+    <span class="weekchip num" id="weekChip"></span>
+  </div>
+</header>
+
+<nav id="tabs" aria-label="요일 선택"></nav>
+<main id="view"></main>
+
+<div class="timerbar">
+  <div class="timer idle" id="timer">
+    <div class="label" id="timerLabel">세트 완료(✓)를 누르면<br>휴식 타이머가 시작됩니다</div>
+    <div class="clock num" id="timerClock">—</div>
+    <button id="timerBtn" hidden>건너뛰기</button>
+  </div>
+</div>
+
+<script>
+/* ══════════ 프로그램 데이터 ══════════ */
+const PROGRAM = [
+ { key:"mon", tab:"월", color:"var(--plate-red)", name:"밀기 A — 가슴 주도", time:"약 70분",
+   note:"주간 최고 컨디션을 벤치에 씁니다. 견갑 후인하강 고정, 바닥에서 가슴으로 밀기.",
+   warm:"유산소 3분 → 암서클 전후 각 10회 → 밴드 풀어파트 15×2 → 푸시업 10회<br><b>벤치:</b> 빈봉×10 → 40×8 → 60×5 → 75×3 → 85×1<br><b>딥스:</b> 맨몸×8",
+   ex:[
+    {n:"플랫 벤치프레스", w:90, s:4, r:6, rest:180, cue:"하단 0.5초 정지. 전 세트 6회 달성 시 다음 주 +2.5kg", prog:2.5},
+    {n:"인클라인 덤벨프레스", w:30, s:3, r:10, rest:120, cue:"RIR 2 — 한쪽 덤벨 무게 기준", prog:2},
+    {n:"딥스 (중량)", w:10, s:3, r:8, rest:150, cue:"몸 앞으로 기울여 아랫가슴 강조. 추가 중량만 기입(맨몸=0)", prog:2.5},
+    {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회", prog:1},
+    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1", prog:0}
+   ]},
+ { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 (컴팩트)", time:"약 50분",
+   note:"유지 모드: 무겁게, 적게, 깔끔하게. RIR 2~3. 증량하지 않습니다 — 쉬워져도 중량 고정.",
+   warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 115×2<br><b>데드:</b> 60×5 → 100×3 → 135×1 (벨트 착용)",
+   ex:[
+    {n:"백스쿼트", w:132.5, s:3, r:5, rest:180, cue:"유지 중량 고정", prog:0},
+    {n:"컨벤셔널 데드리프트", w:155, s:2, r:5, rest:180, cue:"유지 중량 고정", prog:0},
+    {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초", prog:0},
+    {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지", prog:0}
+   ]},
+ { key:"wed", tab:"수", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화", time:"약 60분 + 풋살 20–22시",
+   note:"17시 전 종료 → 18시 탄수화물 식사 → 풋살. 바쁜 주는 1·2·3번만(40분). 큐: 손은 고리, 팔꿈치로 당긴다.",
+   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20~30초 → 밴드 랫풀 15회",
+   ex:[
+    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg", prog:5},
+    {n:"바벨로우", w:82.5, s:3, r:8, rest:150, cue:"몸통 45도, 배꼽 쪽으로", prog:2.5},
+    {n:"랫풀다운 (뉴트럴그립)", w:0, s:3, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기", prog:5},
+    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중", prog:0},
+    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0},
+    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0}
+   ]},
+ { key:"thu", tab:"목", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨", time:"약 65분",
+   note:"풋살 다음날 — 유난히 무거우면 인클라인 5% 감량. 플라이는 큰 호를 그리기.",
+   warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
+   ex:[
+    {n:"인클라인 바벨프레스", w:80, s:4, r:8, rest:150, cue:"전 세트 8회 달성 시 +2.5kg", prog:2.5},
+    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지", prog:0},
+    {n:"펙덱 플라이", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지", prog:0},
+    {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2", prog:2},
+    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지", prog:0}
+   ]},
+ { key:"fri", tab:"금", color:"var(--plate-white)", name:"당기기 B + 팔", time:"약 65분",
+   note:"원암 로우: 팔꿈치를 골반 쪽으로 — 광배 하부. 컬+익스텐션은 슈퍼세트 가능(5분 단축).",
+   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20초",
+   ex:[
+    {n:"원암 덤벨로우", w:0, s:4, r:10, rest:120, cue:"각 팔 10회, RIR 2", prog:2},
+    {n:"랫풀다운 (와이드)", w:0, s:4, r:10, rest:120, cue:"RIR 2", prog:5},
+    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"RIR 2", prog:0},
+    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게", prog:0},
+    {n:"바벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0},
+    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0}
+   ]}
+];
+const HIST_TAB = { key:"hist", tab:"기록", color:"var(--ink-faint)" };
+
+/* ══════════ 저장소 (localStorage + 메모리 폴백) ══════════ */
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k) ?? mem[k] ?? null }catch(e){ return mem[k] ?? null } },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem(k,v) }catch(e){} },
+  del(k){ delete mem[k]; try{ localStorage.removeItem(k) }catch(e){} },
+  keys(){ try{ return Object.keys(localStorage) }catch(e){ return Object.keys(mem) } }
+};
+const skey = (date, day) => `log:${date}:${day}`;
+
+/* ══════════ 상태 ══════════ */
+const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10) };
+let curDate = todayISO();
+let curTab = (()=>{ const dow = new Date().getDay(); return [null,"mon","tue","wed","thu","fri",null][dow] || "mon" })();
+
+/* ══════════ 탭 ══════════ */
+const tabsEl = document.getElementById('tabs');
+function renderTabs(){
+  tabsEl.innerHTML = '';
+  [...PROGRAM, HIST_TAB].forEach(d=>{
+    const b = document.createElement('button');
+    b.style.setProperty('--c', d.color);
+    b.className = curTab===d.key ? 'on' : '';
+    b.innerHTML = `<span class="dot"></span>${d.tab}`;
+    b.onclick = ()=>{ curTab=d.key; renderTabs(); renderView(); };
+    tabsEl.appendChild(b);
+  });
+}
+
+/* ══════════ 세션 데이터 로드/저장 ══════════ */
+function loadSession(dayKey){
+  const raw = store.get(skey(curDate, dayKey));
+  if(raw){ try{ return JSON.parse(raw) }catch(e){} }
+  const day = PROGRAM.find(d=>d.key===dayKey);
+  return { ex: day.ex.map(e=>({ w:e.w, sets:e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] })) };
+}
+function saveSession(dayKey, data){
+  store.set(skey(curDate, dayKey), JSON.stringify(data));
+}
+
+/* ══════════ 메인 뷰 ══════════ */
+const view = document.getElementById('view');
+function renderView(){
+  if(curTab==='hist'){ renderHistory(); return }
+  const day = PROGRAM.find(d=>d.key===curTab);
+  const data = loadSession(day.key);
+  view.innerHTML = '';
+  view.style.setProperty('--c', day.color);
+
+  const head = document.createElement('div');
+  head.innerHTML = `
+    <div class="dayhead" style="--c:${day.color}">
+      <span class="plate"></span><h2>${day.name}</h2><span class="time">${day.time}</span>
+    </div>
+    <p class="daynote">${day.note}</p>
+    <details class="warm"><summary>워밍업</summary><div class="body">${day.warm}</div></details>`;
+  view.appendChild(head);
+
+  day.ex.forEach((ex, xi)=>{
+    const st = data.ex[xi];
+    const card = document.createElement('section');
+    card.className = 'ex';
+    card.style.setProperty('--c', day.color);
+
+    const restTxt = ex.rest>=60 ? `${Math.floor(ex.rest/60)}분${ex.rest%60?` ${ex.rest%60}초`:''}` : `${ex.rest}초`;
+    card.innerHTML = `
+      <div class="ex-head">
+        <span class="order num">${xi+1}</span>
+        <div>
+          <div class="name">${ex.n}</div>
+          <div class="meta num">${ex.s}세트 × ${ex.r}회 목표</div>
+        </div>
+        <div class="rest">휴식<b class="num">${restTxt}</b></div>
+      </div>
+      ${ex.cue?`<div class="cue">${ex.cue}</div>`:''}
+      <div class="sets"></div>
+      <div class="prog num"></div>`;
+
+    const setsEl = card.querySelector('.sets');
+    st.sets.forEach((set, si)=>{
+      const row = document.createElement('div');
+      row.className = 'setrow' + (set.done?' done':'');
+      row.innerHTML = `
+        <span class="idx num">${si+1}</span>
+        <div class="field"><input type="number" inputmode="decimal" step="0.5" min="0"
+          aria-label="${ex.n} ${si+1}세트 중량" value="${si===0? st.w : st.w}" data-role="w"><span class="unit">kg</span></div>
+        <div class="field"><input type="number" inputmode="numeric" step="1" min="0"
+          aria-label="${ex.n} ${si+1}세트 횟수" placeholder="${ex.r}" value="${set.r??''}" data-role="r"><span class="unit">회</span></div>
+        <button class="chk ${set.done?'on':''}" aria-label="${si+1}세트 완료">${set.done?'✓':'○'}</button>`;
+
+      const wIn = row.querySelector('[data-role=w]');
+      const rIn = row.querySelector('[data-role=r]');
+      const chk = row.querySelector('.chk');
+
+      wIn.addEventListener('change', ()=>{
+        const v = parseFloat(wIn.value)||0;
+        st.w = v;
+        // 같은 종목 모든 세트 중량 동기화
+        card.querySelectorAll('[data-role=w]').forEach(i=>i.value=v||'');
+        saveSession(day.key, data); updateProg();
+      });
+      rIn.addEventListener('change', ()=>{
+        set.r = rIn.value==='' ? null : parseInt(rIn.value,10);
+        saveSession(day.key, data); updateProg();
+      });
+      chk.addEventListener('click', ()=>{
+        set.done = !set.done;
+        if(set.done){
+          if(set.r==null){ set.r = ex.r; rIn.value = ex.r } // 빈칸이면 목표횟수로 기록
+          chk.classList.add('on'); chk.textContent='✓'; row.classList.add('done');
+          const isLastSet = st.sets.every(s=>s.done);
+          if(!isLastSet) startTimer(ex.rest, `${ex.n} — 다음 세트까지`);
+          else stopTimer(`${ex.n} 완료`);
+        } else {
+          chk.classList.remove('on'); chk.textContent='○'; row.classList.remove('done');
+        }
+        saveSession(day.key, data); updateProg();
+      });
+      setsEl.appendChild(row);
+    });
+
+    const progEl = card.querySelector('.prog');
+    function updateProg(){
+      const allDone = st.sets.length && st.sets.every(s=>s.done);
+      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r );
+      progEl.className = 'prog num';
+      if(!allDone){ progEl.style.display='none'; return }
+      if(ex.prog===0){
+        progEl.classList.add('keep');
+        progEl.textContent = day.key==='tue' ? '유지 모드 — 다음 주도 같은 중량' : '완료 — RIR 기준으로 다음 주 감각 조절';
+      } else if(allHit){
+        progEl.classList.add('hit');
+        progEl.textContent = `전 세트 목표 달성 — 다음 주 +${ex.prog}kg (${(st.w+ex.prog).toFixed(1).replace(/\.0$/,'')}kg)`;
+      } else {
+        progEl.classList.add('keep');
+        progEl.textContent = '횟수 미달 세트 있음 — 다음 주 같은 중량으로 재도전';
+      }
+    }
+    updateProg();
+    view.appendChild(card);
+  });
+
+  const rules = document.createElement('div');
+  rules.className='rules';
+  rules.innerHTML = `<h3>운영 규칙</h3>
+    상체 <b>더블 프로그레션</b>: 전 세트 목표 횟수 달성 → 다음 주 +2.5kg (풀업·랫풀 +5kg 단위)<br>
+    하체 <b>유지 모드</b>: 스쿼트 132.5 / 데드 155 고정, 증량 없음<br>
+    <b>디로드</b>: 5주 훈련 + 1주 (중량 60%, 세트 절반) — 상단 주차 표시 참고<br>
+    영양: 평일 3,100kcal · 수 3,400kcal · 단백질 145~170g · 수면 7시간+`;
+  view.appendChild(rules);
+}
+
+/* ══════════ 기록 화면 ══════════ */
+function renderHistory(){
+  view.innerHTML = '<div class="dayhead"><h2>세션 기록</h2></div>';
+  const keys = store.keys().filter(k=>k.startsWith('log:')).sort().reverse();
+  if(!keys.length){
+    view.innerHTML += `<div class="empty">아직 기록이 없습니다.<br>요일 탭에서 세트를 체크하면 자동 저장됩니다.</div>`;
+  }
+  keys.forEach(k=>{
+    const [,date,dayKey] = k.split(':');
+    const day = PROGRAM.find(d=>d.key===dayKey); if(!day) return;
+    let data; try{ data = JSON.parse(store.get(k)) }catch(e){ return }
+    let done=0, total=0, vol=0;
+    data.ex.forEach((st,xi)=>{
+      st.sets.forEach(s=>{ total++; if(s.done){ done++; vol += (st.w||0)*(s.r||0) } });
+    });
+    if(done===0) return;
+    const card = document.createElement('div');
+    card.className='histcard'; card.style.setProperty('--c', day.color);
+    card.innerHTML = `
+      <div class="top"><span class="dot"></span>${day.name}<span class="d num">${date}</span></div>
+      <div class="stats num">완료 ${done}/${total} 세트 · 총 볼륨 ${vol.toLocaleString()}kg</div>
+      <button class="del">이 기록 삭제</button>`;
+    card.querySelector('.del').onclick = ()=>{
+      if(confirm(`${date} ${day.name} 기록을 삭제할까요?`)){ store.del(k); renderHistory() }
+    };
+    view.appendChild(card);
+  });
+  const tools = document.createElement('div');
+  tools.className='toolrow';
+  tools.innerHTML = `<button id="expBtn">기록 내보내기 (백업)</button><button id="impBtn">기록 불러오기</button>`;
+  view.appendChild(tools);
+  document.getElementById('expBtn').onclick = ()=>{
+    const dump = {};
+    store.keys().filter(k=>k.startsWith('log:')).forEach(k=>dump[k]=store.get(k));
+    const blob = new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `쇠질로그_백업_${todayISO()}.json`; a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  document.getElementById('impBtn').onclick = ()=>{
+    const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+    inp.onchange = ()=>{
+      const f = inp.files[0]; if(!f) return;
+      const rd = new FileReader();
+      rd.onload = ()=>{ try{
+        const dump = JSON.parse(rd.result);
+        Object.entries(dump).forEach(([k,v])=>{ if(k.startsWith('log:')) store.set(k,v) });
+        renderHistory();
+      }catch(e){ alert('파일 형식을 읽을 수 없습니다') } };
+      rd.readAsText(f);
+    };
+    inp.click();
+  };
+}
+
+/* ══════════ 휴식 타이머 ══════════ */
+const timerEl = document.getElementById('timer');
+const timerLabel = document.getElementById('timerLabel');
+const timerClock = document.getElementById('timerClock');
+const timerBtn = document.getElementById('timerBtn');
+let tInt=null, tLeft=0;
+let audioCtx=null;
+function beep(freq=880, dur=0.12, when=0){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+    const t = audioCtx.currentTime + when;
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.02);
+  }catch(e){}
+}
+function fmt(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
+function startTimer(sec, label){
+  clearInterval(tInt);
+  tLeft = sec;
+  timerEl.classList.remove('idle');
+  timerLabel.innerHTML = label;
+  timerBtn.hidden = false;
+  timerClock.className='clock num';
+  timerClock.textContent = fmt(tLeft);
+  beep(660,0.08); // 시작음 (사용자 제스처 직후라 iOS OK)
+  tInt = setInterval(()=>{
+    tLeft--;
+    timerClock.textContent = fmt(Math.max(tLeft,0));
+    timerClock.className = 'clock num' + (tLeft<=10&&tLeft>0?' warn':'') + (tLeft<=0?' zero':'');
+    if(tLeft===10) beep(660,0.1);
+    if(tLeft<=0){
+      clearInterval(tInt);
+      beep(880,0.15,0); beep(880,0.15,0.25); beep(1100,0.3,0.5);
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      timerLabel.innerHTML = '휴식 끝 — 다음 세트';
+      timerBtn.hidden = true;
+      setTimeout(resetTimer, 4000);
+    }
+  },1000);
+}
+function stopTimer(msg){
+  clearInterval(tInt);
+  timerLabel.innerHTML = msg || '완료';
+  timerClock.textContent='✓'; timerClock.className='clock num zero';
+  timerBtn.hidden = true;
+  setTimeout(resetTimer, 3000);
+}
+function resetTimer(){
+  clearInterval(tInt);
+  timerEl.classList.add('idle');
+  timerLabel.innerHTML = '세트 완료(✓)를 누르면<br>휴식 타이머가 시작됩니다';
+  timerClock.textContent='—'; timerClock.className='clock num';
+  timerBtn.hidden = true;
+}
+timerBtn.onclick = ()=>resetTimer();
+
+/* ══════════ 날짜 + 주차 ══════════ */
+const dateInput = document.getElementById('dateInput');
+dateInput.value = curDate;
+dateInput.addEventListener('change', ()=>{ curDate = dateInput.value || todayISO(); renderView() });
+
+// 3주차 시작일 = 2026-08-31 (정상 중량 복귀). 이후 5+1 디로드 사이클 표시
+const CYCLE_START = new Date('2026-08-31T00:00:00');
+function weekInfo(){
+  const now = new Date(curDate+'T00:00:00');
+  const diff = Math.floor((now - CYCLE_START)/(7*24*3600*1000));
+  if(diff < 0) return '복귀 주간';
+  const pos = diff % 6; // 0~4 훈련, 5 디로드
+  return pos===5 ? '디로드 주 — 중량 60%, 세트 절반' : `사이클 ${Math.floor(diff/6)+1} · ${pos+1}주차`;
+}
+const weekChip = document.getElementById('weekChip');
+function renderWeek(){ weekChip.textContent = weekInfo() }
+dateInput.addEventListener('change', renderWeek);
+
+/* ══════════ 시작 ══════════ */
+renderTabs(); renderView(); renderWeek();
+</script>
+</body>
+</html>
