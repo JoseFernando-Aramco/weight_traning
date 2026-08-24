@@ -149,6 +149,20 @@
   .histcard .top .dot{width:10px; height:10px; border-radius:50%; background:var(--c)}
   .histcard .top .d{margin-left:auto; color:var(--ink-faint); font-size:.8rem; font-weight:700}
   .histcard .stats{color:var(--ink-dim); font-size:.85rem; margin-top:6px; line-height:1.6}
+  .histcard .hstats{color:var(--ink-dim); font-size:.83rem; margin-top:6px; line-height:1.6;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .vd{font-size:.72rem; font-weight:800; padding:3px 10px; border-radius:999px}
+  .vd.ok{background:rgba(63,169,108,.15); color:#7fd4a4}
+  .vd.warn{background:rgba(255,176,32,.12); color:var(--amber)}
+  .vd.gray{background:var(--panel-2); color:var(--ink-faint)}
+  .hrows{border-top:1px solid var(--line); margin-top:10px; padding-top:4px}
+  .hrow{display:flex; align-items:center; gap:8px; padding:7px 0; font-size:.83rem}
+  .hrow .hname{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .hrow .hres{color:var(--ink-dim); white-space:nowrap}
+  .fb{font-size:.72rem; font-weight:800; padding:3px 9px; border-radius:999px; white-space:nowrap}
+  .fb.up{background:rgba(63,169,108,.15); color:#7fd4a4}
+  .fb.keep{background:rgba(255,176,32,.12); color:var(--amber)}
+  .fb.gray{background:var(--panel-2); color:var(--ink-faint)}
   .histcard .del{margin-top:8px; background:none; border:none; color:var(--ink-faint);
     font:inherit; font-size:.78rem; font-weight:700; cursor:pointer; padding:8px 0; min-height:var(--tap)}
   .empty{color:var(--ink-faint); text-align:center; padding:48px 16px; font-size:.9rem; line-height:1.7}
@@ -282,7 +296,11 @@ function loadSession(dayKey){
   const raw = store.get(skey(curDate, dayKey));
   if(raw){ try{ return JSON.parse(raw) }catch(e){} }
   const day = PROGRAM.find(d=>d.key===dayKey);
-  return { ex: day.ex.map(e=>({ w:e.w, sets:e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] })) };
+  return { ex: day.ex.map((e,i)=>{
+    const cw = parseFloat(store.get(`cur:${dayKey}:${i}`));
+    return { w: isNaN(cw) ? e.w : cw,
+             sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
+  }) };
 }
 function saveSession(dayKey, data){
   store.set(skey(curDate, dayKey), JSON.stringify(data));
@@ -375,6 +393,9 @@ function renderView(){
       const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r );
       progEl.className = 'prog num';
       if(!allDone){ progEl.style.display='none'; return }
+      // 다음 세션 시작 중량 저장: 달성 시 +prog, 미달·유지 모드면 현재 중량 유지
+      const nextW = (allHit && ex.prog>0) ? st.w + ex.prog : st.w;
+      store.set(`cur:${day.key}:${xi}`, String(nextW));
       if(ex.prog===0){
         progEl.classList.add('keep');
         progEl.textContent = day.key==='tue' ? '유지 모드 — 다음 주도 같은 중량' : '완료 — RIR 기준으로 다음 주 감각 조절';
@@ -404,29 +425,60 @@ function renderView(){
 function renderHistory(){
   view.innerHTML = '<div class="dayhead"><h2>세션 기록</h2></div>';
   const keys = store.keys().filter(k=>k.startsWith('log:')).sort().reverse();
-  if(!keys.length){
-    view.innerHTML += `<div class="empty">아직 기록이 없습니다.<br>요일 탭에서 세트를 체크하면 자동 저장됩니다.</div>`;
-  }
+  let shown = 0;
   keys.forEach(k=>{
     const [,date,dayKey] = k.split(':');
     const day = PROGRAM.find(d=>d.key===dayKey); if(!day) return;
     let data; try{ data = JSON.parse(store.get(k)) }catch(e){ return }
-    let done=0, total=0, vol=0;
+    let done=0, total=0, vol=0, hitCnt=0, judged=0;
+    const rows = [];
     data.ex.forEach((st,xi)=>{
-      st.sets.forEach(s=>{ total++; if(s.done){ done++; vol += (st.w||0)*(s.r||0) } });
+      const ex = day.ex[xi]; if(!ex) return;
+      let exDone=0;
+      st.sets.forEach(s=>{ total++; if(s.done){ done++; exDone++; vol += (st.w||0)*(s.r||0) } });
+      if(exDone===0) return;
+      const allDone = st.sets.every(s=>s.done);
+      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r );
+      const reps = st.sets.map(s=> s.done ? (s.r??0) : '–').join('/');
+      const wTxt = st.w>0 ? `${st.w}kg` : '맨몸';
+      let badge;
+      if(!allDone){
+        badge = `<span class="fb gray">미완료</span>`;
+      } else if(ex.prog===0 && day.key==='tue'){
+        judged++; badge = `<span class="fb gray">유지 모드</span>`;
+      } else if(ex.prog===0){
+        judged++; hitCnt += allHit?1:0;
+        badge = `<span class="fb gray">감각 유지</span>`;
+      } else if(allHit){
+        judged++; hitCnt++;
+        badge = `<span class="fb up">↑ 다음 ${(st.w+ex.prog).toFixed(1).replace(/\.0$/,'')}kg</span>`;
+      } else {
+        judged++;
+        badge = `<span class="fb keep">${wTxt} 유지</span>`;
+      }
+      rows.push(`<div class="hrow"><span class="hname">${ex.n}</span><span class="hres num">${wTxt} · ${reps}</span>${badge}</div>`);
     });
     if(done===0) return;
+    shown++;
+    const allSession = done===total && judged>0 && rows.every(r=>!r.includes('fb keep')&&!r.includes('미완료'));
+    const verdict = done<total
+      ? `<span class="vd gray">중단됨</span>`
+      : allSession ? `<span class="vd ok">전 종목 달성</span>` : `<span class="vd warn">일부 미달</span>`;
     const card = document.createElement('div');
     card.className='histcard'; card.style.setProperty('--c', day.color);
     card.innerHTML = `
       <div class="top"><span class="dot"></span>${day.name}<span class="d num">${date}</span></div>
-      <div class="stats num">완료 ${done}/${total} 세트 · 총 볼륨 ${vol.toLocaleString()}kg</div>
+      <div class="hstats num">완료 ${done}/${total} 세트 · 볼륨 ${vol.toLocaleString()}kg ${verdict}</div>
+      <div class="hrows">${rows.join('')}</div>
       <button class="del">이 기록 삭제</button>`;
     card.querySelector('.del').onclick = ()=>{
       if(confirm(`${date} ${day.name} 기록을 삭제할까요?`)){ store.del(k); renderHistory() }
     };
     view.appendChild(card);
   });
+  if(!shown){
+    view.innerHTML += `<div class="empty">아직 기록이 없습니다.<br>요일 탭에서 세트를 체크하면 자동 저장됩니다.</div>`;
+  }
   const tools = document.createElement('div');
   tools.className='toolrow';
   tools.innerHTML = `<button id="expBtn">기록 내보내기 (백업)</button><button id="impBtn">기록 불러오기</button>`;
