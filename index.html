@@ -516,22 +516,6 @@ const timerClock = document.getElementById('timerClock');
 const timerBtn = document.getElementById('timerBtn');
 let tInt=null, tLeft=0;
 let audioCtx=null;
-/* 무음 킵얼라이브: 타이머 동안 무음 루프를 재생해 iOS가 오디오 세션을 유지하게 함 */
-let keepAlive=null;
-function makeKeepAlive(){
-  if(keepAlive) return keepAlive;
-  // 1초짜리 무음 WAV를 런타임 생성 (8kHz mono 8bit)
-  const n=8000, buf=new ArrayBuffer(44+n), v=new DataView(buf);
-  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
-  ws(0,'RIFF'); v.setUint32(4,36+n,true); ws(8,'WAVE'); ws(12,'fmt ');
-  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
-  v.setUint32(24,8000,true); v.setUint32(28,8000,true); v.setUint16(32,1,true); v.setUint16(34,8,true);
-  ws(36,'data'); v.setUint32(40,n,true);
-  for(let i=0;i<n;i++) v.setUint8(44+i,128);
-  const a=new Audio(URL.createObjectURL(new Blob([buf],{type:'audio/wav'})));
-  a.loop=true; a.volume=0.01; a.setAttribute('playsinline','');
-  keepAlive=a; return a;
-}
 function beep(freq=880, dur=0.12, when=0){
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
@@ -570,7 +554,6 @@ function startTimer(sec, label){
   timerClock.className='clock num';
   timerClock.textContent = fmt(sec);
   beep(660,0.08); // 시작음 (사용자 제스처 직후라 iOS OK)
-  try{ makeKeepAlive().play().catch(()=>{}) }catch(e){}
   tInt = setInterval(tick, 250);
 }
 // 백그라운드 복귀 시 즉시 재계산 (화면 꺼짐/앱 전환 후에도 잔여시간 정확)
@@ -587,7 +570,6 @@ function stopTimer(msg){
 function resetTimer(){
   clearInterval(tInt);
   tEndAt = 0; tDone = false;
-  try{ if(keepAlive) keepAlive.pause() }catch(e){}
   timerEl.classList.add('idle');
   timerLabel.innerHTML = '세트 완료(✓)를 누르면<br>휴식 타이머가 시작됩니다';
   timerClock.textContent='—'; timerClock.className='clock num';
