@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#24272c">
 <title>쇠질로그 — 상체 집중 5분할</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -19,6 +19,7 @@
     --tap:48px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  button,.chk,.grab,nav button,summary{touch-action:manipulation}
   html{font-size:16px}
   body{
     margin:0; background:var(--bg); color:var(--ink);
@@ -146,7 +147,7 @@
   .ring svg{width:100%; height:100%; transform:rotate(-90deg)}
   .ring circle{fill:none; stroke-width:12}
   .ring .track{stroke:var(--line)}
-  .ring .bar{stroke:var(--done); stroke-linecap:round; transition:stroke-dashoffset .25s linear, stroke .3s}
+  .ring .bar{stroke:var(--done); stroke-linecap:round; transition:stroke .3s}
   .ring .t{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
   .ring .t .n{font-size:clamp(48px,16vw,64px); font-weight:900; line-height:1; letter-spacing:.01em}
   .ring .t .s{font-size:.75rem; color:var(--ink-dim); margin-top:8px; font-weight:700}
@@ -171,7 +172,7 @@
   .tsheet.mini .mini-n{font-size:2.5rem; font-weight:900; margin-left:auto; line-height:1}
   .tsheet.mini.warn .mini-n{color:var(--amber)}
   .stripe,.mini-n{display:none} .tsheet.mini .stripe,.tsheet.mini .mini-n{display:block}
-  @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .ring .bar{transition:none} .tsheet *{animation:none!important} }
+  @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .tsheet *{animation:none!important} }
 
   /* ── 기록 화면 ─────────────────────── */
   .histcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
@@ -589,19 +590,28 @@ function beep(freq=880, dur=0.12, when=0){
   }catch(e){}
 }
 function fmt(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
+let tRaf=null, tStartAt=0;
+const easeOut = x => 1 - Math.pow(1-x, 3);
+function drawRing(){
+  if(!tEndAt){ tRaf=null; return }
+  const now=Date.now();
+  let ratio = Math.max(0, Math.min(1, (tEndAt-now)/1000/tTotal));
+  const intro = Math.min(1, (now - tStartAt)/850);      // 처음 0.85초: 0에서 차오르는 연출
+  if(intro<1) ratio = ratio * easeOut(intro);
+  tBar.style.strokeDashoffset = String(CIRC*(1-ratio));
+  tRaf = requestAnimationFrame(drawRing);
+}
 function tick(){
   tLeft = Math.ceil((tEndAt - Date.now())/1000);
   const shown = fmt(Math.max(tLeft,0));
   tN.textContent = shown; tMiniN.textContent = shown;
-  const ratio = Math.max(0, Math.min(1, (tEndAt-Date.now())/1000/tTotal));
-  tBar.style.strokeDashoffset = String(CIRC*(1-ratio));
   tsheet.classList.toggle('warn', tLeft<=10 && tLeft>0);
   if(tLeft===10 && !tsheet.dataset.warned){ tsheet.dataset.warned='1'; beep(660,0.1) }
   if(tLeft<=0 && !tDone){
     tDone = true; clearInterval(tInt);
     beep(880,0.15,0); beep(880,0.15,0.25); beep(1100,0.3,0.5);
     if(navigator.vibrate) navigator.vibrate([200,100,200]);
-    tsheet.classList.remove('warn'); tsheet.classList.add('zero');
+    tsheet.classList.remove('warn'); tsheet.classList.add('zero'); tBar.style.strokeDashoffset=String(CIRC);
     tS.textContent='휴식 끝'; tN.textContent='GO'; tMiniN.textContent='GO';
     setTimeout(hideTimer, 4000);
   }
@@ -615,15 +625,15 @@ function startTimer(sec, info){
   tsheet.classList.remove('warn','zero','mini','enter');
   void tsheet.offsetWidth;                         // 애니메이션 재트리거
   tsheet.classList.add('show','enter');
-  tBar.style.transition='none'; tBar.style.strokeDashoffset=String(CIRC);
-  void tBar.getBoundingClientRect();
-  tBar.style.transition='stroke-dashoffset .7s .15s cubic-bezier(.2,.8,.2,1), stroke .3s';
+  tStartAt = Date.now(); tBar.style.strokeDashoffset=String(CIRC);
+  if(tRaf) cancelAnimationFrame(tRaf); tRaf = requestAnimationFrame(drawRing);
   tick(); beep(660,0.08);
-  setTimeout(()=>{ tBar.style.transition='stroke-dashoffset .25s linear, stroke .3s'; tsheet.classList.remove('enter') }, 900);
+  setTimeout(()=>tsheet.classList.remove('enter'), 900);
   tInt = setInterval(tick, 250);
 }
 function stopTimer(msg){
   clearInterval(tInt); tEndAt=0; tDone=true;
+  if(tRaf){ cancelAnimationFrame(tRaf); tRaf=null }
   tExName.textContent = msg; tS.textContent=''; tNext.innerHTML='';
   tN.textContent='✓'; tMiniN.textContent='✓';
   tBar.style.strokeDashoffset='0';
@@ -632,6 +642,7 @@ function stopTimer(msg){
 }
 function hideTimer(){
   clearInterval(tInt); tEndAt=0; tDone=false;
+  if(tRaf){ cancelAnimationFrame(tRaf); tRaf=null }
   tsheet.classList.remove('show','warn','zero','mini');
 }
 tSkip.onclick = hideTimer;
