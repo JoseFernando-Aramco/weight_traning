@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#131518">
+<meta name="theme-color" content="#24272c">
 <title>쇠질로그 — 상체 집중 5분할</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   :root{
-    --bg:#131518; --panel:#1c1f24; --panel-2:#22262c; --line:#2e333b;
-    --ink:#eef1f4; --ink-dim:#9aa3ad; --ink-faint:#6b7480;
+    --bg:#24272c; --panel:#2e3238; --panel-2:#393e46; --line:#4a505a;
+    --ink:#f2f4f6; --ink-dim:#aab2bc; --ink-faint:#7f8894;
     /* IPF 원판 컬러 — 요일 코드 */
     --plate-red:#e2493b; --plate-blue:#3f7fd4; --plate-yellow:#e8b33a;
     --plate-green:#3fa96c; --plate-white:#d8dde2;
@@ -23,7 +23,7 @@
   body{
     margin:0; background:var(--bg); color:var(--ink);
     font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    padding-bottom:calc(110px + env(safe-area-inset-bottom));
     -webkit-text-size-adjust:100%;
   }
   .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
@@ -108,7 +108,7 @@
     background:var(--panel-2); color:var(--ink-faint); font-size:1.15rem; font-weight:900; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
-  .chk.on{background:var(--done); border-color:var(--done); color:#0d1410}
+  .chk.on{background:var(--done); border-color:var(--done); color:#12211a}
   .chk:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
   .setrow.done input{color:var(--ink-dim)}
 
@@ -118,29 +118,50 @@
   .prog.hit{display:block; background:rgba(63,169,108,.12); color:#7fd4a4; border:1px solid rgba(63,169,108,.35)}
   .prog.keep{display:block; background:rgba(255,176,32,.08); color:var(--amber); border:1px solid rgba(255,176,32,.3)}
 
-  /* ── 하단 타이머 바 ─────────────────── */
-  .timerbar{
+  /* ── 휴식 타이머 시트 ─────────────────── */
+  .tsheet{
     position:fixed; left:0; right:0; bottom:0; z-index:50;
-    background:linear-gradient(180deg, rgba(19,21,24,0) 0%, var(--bg) 22%);
-    padding:18px 16px calc(14px + env(safe-area-inset-bottom));
-    display:flex; justify-content:center; pointer-events:none;
+    background:var(--panel); border-radius:28px 28px 0 0;
+    box-shadow:0 -12px 40px rgba(0,0,0,.6);
+    padding:10px 24px calc(22px + env(safe-area-inset-bottom));
+    transform:translateY(110%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    display:flex; flex-direction:column;
   }
-  .timer{
-    pointer-events:auto; width:100%; max-width:608px;
-    background:var(--panel-2); border:1px solid var(--line); border-radius:16px;
-    display:flex; align-items:center; gap:14px; padding:12px 16px;
-    box-shadow:0 -6px 24px rgba(0,0,0,.4);
-  }
-  .timer .label{font-size:.78rem; color:var(--ink-dim); font-weight:700; line-height:1.35}
-  .timer .clock{font-size:2rem; font-weight:900; letter-spacing:.01em; margin-left:auto}
-  .timer .clock.warn{color:var(--amber)}
-  .timer .clock.zero{color:var(--done)}
-  .timer button{
-    min-height:var(--tap); min-width:var(--tap); padding:0 16px; border-radius:12px; border:1px solid var(--line);
-    background:var(--panel); color:var(--ink); font:inherit; font-weight:800; cursor:pointer;
-  }
-  .timer.idle .label{color:var(--ink-faint)}
-  .timer.idle .clock{color:var(--ink-faint); font-size:1.2rem; font-weight:700}
+  .tsheet.show{transform:translateY(0)}
+  .tsheet .handle{width:44px; height:5px; border-radius:3px; background:var(--line); margin:0 auto 14px}
+  .tsheet .grab{min-height:var(--tap); margin:-10px -24px 0; padding:10px 24px 0; cursor:pointer}
+  .tsheet .tex{font-size:.85rem; color:var(--ink-dim); font-weight:700}
+  .tsheet .tex b{display:block; color:var(--ink); font-size:1.1rem; margin-top:3px; font-weight:800}
+  .ring{position:relative; width:min(62vw,240px); height:min(62vw,240px); margin:16px auto 4px}
+  .ring svg{width:100%; height:100%; transform:rotate(-90deg)}
+  .ring circle{fill:none; stroke-width:12}
+  .ring .track{stroke:var(--line)}
+  .ring .bar{stroke:var(--done); stroke-linecap:round; transition:stroke-dashoffset .25s linear, stroke .3s}
+  .ring .t{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+  .ring .t .n{font-size:clamp(48px,16vw,64px); font-weight:900; line-height:1; letter-spacing:.01em}
+  .ring .t .s{font-size:.75rem; color:var(--ink-dim); margin-top:8px; font-weight:700}
+  .tsheet.warn .ring .bar{stroke:var(--amber)} .tsheet.warn .ring .n{color:var(--amber)}
+  .tsheet.zero .ring .bar{stroke:var(--done)} .tsheet.zero .ring .n{color:var(--done)}
+  .tsheet .next{text-align:center; font-size:.85rem; color:var(--ink-dim); margin-top:6px; min-height:1.3em}
+  .tsheet .next b{color:var(--ink)}
+  .tsheet .btns{display:flex; gap:10px; margin-top:18px}
+  .tsheet .btns button{flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line);
+    background:var(--panel-2); color:var(--ink); font:inherit; font-weight:800; font-size:.95rem; cursor:pointer}
+  .tsheet .btns button.primary{background:var(--amber); color:#1f2226; border-color:var(--amber)}
+  .tsheet .btns button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+
+  /* 접힌 상태 */
+  .tsheet.mini{padding:12px 18px calc(12px + env(safe-area-inset-bottom)); border-radius:18px;
+    left:14px; right:14px; bottom:14px; flex-direction:row; align-items:center; gap:14px; border:1px solid var(--line)}
+  .tsheet.mini .handle,.tsheet.mini .ring,.tsheet.mini .next,.tsheet.mini .btns{display:none}
+  .tsheet.mini .grab{margin:0; padding:0; flex:1; display:flex; align-items:center; gap:14px}
+  .tsheet.mini .stripe{width:6px; height:44px; border-radius:3px; background:var(--done); flex:none}
+  .tsheet.mini.warn .stripe{background:var(--amber)}
+  .tsheet.mini .tex{font-size:.8rem; line-height:1.35} .tsheet.mini .tex b{font-size:.85rem; margin-top:0}
+  .tsheet.mini .mini-n{font-size:2.5rem; font-weight:900; margin-left:auto; line-height:1}
+  .tsheet.mini.warn .mini-n{color:var(--amber)}
+  .stripe,.mini-n{display:none} .tsheet.mini .stripe,.tsheet.mini .mini-n{display:block}
+  @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .ring .bar{transition:none} }
 
   /* ── 기록 화면 ─────────────────────── */
   .histcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
@@ -197,11 +218,24 @@
 <nav id="tabs" aria-label="요일 선택"></nav>
 <main id="view"></main>
 
-<div class="timerbar">
-  <div class="timer idle" id="timer">
-    <div class="label" id="timerLabel">세트 완료(✓)를 누르면<br>휴식 타이머가 시작됩니다</div>
-    <div class="clock num" id="timerClock">—</div>
-    <button id="timerBtn" hidden>건너뛰기</button>
+<div class="tsheet" id="tsheet" role="dialog" aria-label="휴식 타이머">
+  <div class="grab" id="tGrab">
+    <div class="handle"></div>
+    <div class="stripe"></div>
+    <div class="tex" id="tEx">휴식<b id="tExName">—</b></div>
+    <div class="mini-n num" id="tMiniN">—</div>
+  </div>
+  <div class="ring">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+      <circle class="track" cx="125" cy="125" r="112"/>
+      <circle class="bar" id="tBar" cx="125" cy="125" r="112" stroke-dasharray="703.7" stroke-dashoffset="0"/>
+    </svg>
+    <div class="t"><div class="n num" id="tN">—</div><div class="s num" id="tS"></div></div>
+  </div>
+  <div class="next" id="tNext"></div>
+  <div class="btns">
+    <button id="tPlus" type="button">+30초</button>
+    <button id="tSkip" type="button" class="primary">건너뛰기</button>
   </div>
 </div>
 
@@ -213,53 +247,53 @@ const PROGRAM = [
    warm:"유산소 3분 → 암서클 전후 각 10회 → 밴드 풀어파트 15×2 → 푸시업 10회<br><b>벤치:</b> 빈봉×10 → 40×8 → 60×5 → 75×3 → 85×1<br><b>딥스:</b> 맨몸×8",
    ex:[
     {n:"플랫 벤치프레스", w:90, s:4, r:6, rest:180, cue:"하단 0.5초 정지. 전 세트 6회 달성 시 다음 주 +2.5kg", prog:2.5},
-    {n:"인클라인 덤벨프레스", w:30, s:3, r:10, rest:120, cue:"RIR 2 — 한쪽 덤벨 무게 기준", prog:2},
-    {n:"딥스 (중량)", w:10, s:3, r:8, rest:150, cue:"몸 앞으로 기울여 아랫가슴 강조. 추가 중량만 기입(맨몸=0)", prog:2.5},
-    {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회", prog:1},
-    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1", prog:0}
+    {n:"인클라인 덤벨프레스", w:30, s:3, r:10, rest:120, cue:"RIR 2 — 한쪽 덤벨 무게 기준 · 마지막 세트 최대 12회", prog:2, lastMin:12},
+    {n:"딥스 (중량)", w:10, s:3, r:8, rest:150, cue:"몸 앞으로 기울여 아랫가슴 강조. 추가 중량만 기입(맨몸=0) · 마지막 세트 최대 10회", prog:2.5, bw:true, lastMin:10},
+    {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
+    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
    ]},
  { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 (컴팩트)", time:"약 55분",
-   note:"유지 모드: 무겁게, 적게, 깔끔하게. RIR 2~3. 증량하지 않습니다 — 쉬워져도 중량 고정.",
+   note:"유지+근력 모드: 무겁게, 적게, 깔끔하게. 스쿼트·데드는 마지막 세트 7회 상한 AMRAP — 7회 달성 시에만 증량.",
    warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 115×2<br><b>데드:</b> 60×5 → 100×3 → 135×1 (벨트 착용)",
    ex:[
-    {n:"백스쿼트", w:132.5, s:3, r:5, rest:180, cue:"유지 중량 고정", prog:0},
-    {n:"컨벤셔널 데드리프트", w:155, s:2, r:5, rest:180, cue:"유지 중량 고정", prog:0},
-    {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초", prog:0},
-    {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지", prog:0},
+    {n:"백스쿼트", w:132.5, s:3, r:5, rest:180, cue:"마지막 세트는 최대 7회까지 (7회 되면 멈춤). 7회 나오면 다음 주 +2.5kg", prog:2.5, lastMin:7},
+    {n:"컨벤셔널 데드리프트", w:155, s:2, r:5, rest:180, cue:"마지막 세트는 최대 7회까지 (7회 되면 멈춤). 7회 나오면 다음 주 +2.5kg", prog:2.5, lastMin:7},
+    {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"행잉 레그레이즈", w:0, s:3, r:12, rest:90, cue:"골반을 말아 올리기 — 다리만 들면 허벅지 운동. 힘들면 니레이즈로", prog:0}
    ]},
  { key:"wed", tab:"수", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화", time:"약 60분 + 풋살 20–22시",
    note:"17시 전 종료 → 18시 탄수화물 식사 → 풋살. 바쁜 주는 1·2·3번만(40분). 큐: 손은 고리, 팔꿈치로 당긴다.",
    warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20~30초 → 밴드 랫풀 15회",
    ex:[
-    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg", prog:5},
+    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg · 마지막 세트 최대 10회", prog:5, bw:true, lastMin:10},
     {n:"바벨로우", w:82.5, s:3, r:8, rest:150, cue:"몸통 45도, 배꼽 쪽으로", prog:2.5},
-    {n:"랫풀다운 (뉴트럴그립)", w:0, s:3, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기", prog:5},
-    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중", prog:0},
-    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0},
-    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0}
+    {n:"랫풀다운 (뉴트럴그립)", w:0, s:3, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", prog:5, lastMin:12},
+    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14},
+    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14}
    ]},
  { key:"thu", tab:"목", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨", time:"약 65분",
    note:"풋살 다음날 — 유난히 무거우면 인클라인 5% 감량. 플라이는 큰 호를 그리기.",
    warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
    ex:[
     {n:"인클라인 바벨프레스", w:80, s:4, r:8, rest:150, cue:"전 세트 8회 달성 시 +2.5kg", prog:2.5},
-    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지", prog:0},
-    {n:"펙덱 플라이", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지", prog:0},
-    {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2", prog:2},
-    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지", prog:0}
+    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"펙덱 플라이", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
+    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18}
    ]},
  { key:"fri", tab:"금", color:"var(--plate-white)", name:"당기기 B + 팔·복근", time:"약 70분",
    note:"원암 로우: 팔꿈치를 골반 쪽으로 — 광배 하부. 컬+익스텐션은 슈퍼세트 가능(5분 단축).",
    warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20초",
    ex:[
-    {n:"원암 덤벨로우", w:0, s:4, r:10, rest:120, cue:"각 팔 10회, RIR 2", prog:2},
-    {n:"랫풀다운 (와이드)", w:0, s:4, r:10, rest:120, cue:"RIR 2", prog:5},
-    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"RIR 2", prog:0},
-    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게", prog:0},
-    {n:"바벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0},
-    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1", prog:0},
-    {n:"케이블 크런치", w:23, s:3, r:12, rest:90, cue:"엉덩이 고정, 흉곽을 골반 쪽으로. 팔로 당기지 말기 (50lb≈23kg 시작)", prog:0}
+    {n:"원암 덤벨로우", w:0, s:4, r:10, rest:120, cue:"각 팔 10회, RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
+    {n:"랫풀다운 (와이드)", w:0, s:4, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:5, lastMin:12},
+    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"RIR 2 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"바벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"케이블 크런치", w:23, s:3, r:12, rest:90, cue:"엉덩이 고정, 흉곽을 골반 쪽으로. 팔로 당기지 말기 (50lb≈23kg 시작) · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
    ]}
 ];
 const HIST_TAB = { key:"hist", tab:"기록", color:"var(--ink-faint)" };
@@ -355,7 +389,7 @@ function renderView(){
         <div class="field"><input type="number" inputmode="decimal" step="0.5" min="0"
           aria-label="${ex.n} ${si+1}세트 중량" value="${si===0? st.w : st.w}" data-role="w"><span class="unit">kg</span></div>
         <div class="field"><input type="number" inputmode="numeric" step="1" min="0"
-          aria-label="${ex.n} ${si+1}세트 횟수" placeholder="${ex.r}" value="${set.r??''}" data-role="r"><span class="unit">회</span></div>
+          aria-label="${ex.n} ${si+1}세트 횟수" placeholder="${ex.lastMin && si===st.sets.length-1 ? ex.r+'~'+ex.lastMin : ex.r}" value="${set.r??''}" data-role="r"><span class="unit">회</span></div>
         <button class="chk ${set.done?'on':''}" aria-label="${si+1}세트 완료">${set.done?'✓':'○'}</button>`;
 
       const wIn = row.querySelector('[data-role=w]');
@@ -379,8 +413,12 @@ function renderView(){
           if(set.r==null){ set.r = ex.r; rIn.value = ex.r } // 빈칸이면 목표횟수로 기록
           chk.classList.add('on'); chk.textContent='✓'; row.classList.add('done');
           const isLastSet = st.sets.every(s=>s.done);
-          if(!isLastSet) startTimer(ex.rest, `${ex.n} — 다음 세트까지`);
-          else stopTimer(`${ex.n} 완료`);
+          if(!isLastSet){
+            const nx = st.sets.findIndex(x=>!x.done);
+            const wTxt = st.w>0 ? `${st.w}kg × ` : (ex.bw ? '맨몸 × ' : '');
+            const target = (ex.lastMin && nx===st.sets.length-1) ? `${ex.r}~${ex.lastMin}회` : `${ex.r}회`;
+            startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`});
+          } else stopTimer(`${ex.n} 완료`);
         } else {
           chk.classList.remove('on'); chk.textContent='○'; row.classList.remove('done');
         }
@@ -392,21 +430,30 @@ function renderView(){
     const progEl = card.querySelector('.prog');
     function updateProg(){
       const allDone = st.sets.length && st.sets.every(s=>s.done);
-      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r );
+      const lastOk  = !ex.lastMin || ((st.sets[st.sets.length-1].r??0) >= ex.lastMin);
+      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r ) && lastOk;
       progEl.className = 'prog num';
       if(!allDone){ progEl.style.display='none'; return }
+      // 중량 미입력 보조운동: 이월·증량 판정 없이 안내만
+      if(ex.prog>0 && !ex.bw && !(st.w>0)){
+        progEl.classList.add('keep');
+        progEl.textContent = allHit ? '마지막 세트 상한 달성 — 중량을 적어두면 다음 주부터 자동 증량' : '중량을 적어두면 다음 주부터 자동 판정';
+        return;
+      }
       // 다음 세션 시작 중량 저장: 달성 시 +prog, 미달·유지 모드면 현재 중량 유지
       const nextW = (allHit && ex.prog>0) ? st.w + ex.prog : st.w;
       store.set(`cur:${day.key}:${xi}`, String(nextW));
       if(ex.prog===0){
         progEl.classList.add('keep');
-        progEl.textContent = day.key==='tue' ? '유지 모드 — 다음 주도 같은 중량' : '완료 — RIR 기준으로 다음 주 감각 조절';
+        progEl.textContent = '완료 — 횟수 종목, 폼 유지';
       } else if(allHit){
         progEl.classList.add('hit');
         progEl.textContent = `전 세트 목표 달성 — 다음 주 +${ex.prog}kg (${(st.w+ex.prog).toFixed(1).replace(/\.0$/,'')}kg)`;
       } else {
         progEl.classList.add('keep');
-        progEl.textContent = '횟수 미달 세트 있음 — 다음 주 같은 중량으로 재도전';
+        progEl.textContent = ex.lastMin
+          ? `마지막 세트 ${ex.lastMin}회 미달 — 다음 주 같은 중량 유지`
+          : '횟수 미달 세트 있음 — 다음 주 같은 중량으로 재도전';
       }
     }
     updateProg();
@@ -416,10 +463,11 @@ function renderView(){
   const rules = document.createElement('div');
   rules.className='rules';
   rules.innerHTML = `<h3>운영 규칙</h3>
-    상체 <b>더블 프로그레션</b>: 전 세트 목표 횟수 달성 → 다음 주 +2.5kg (풀업·랫풀 +5kg 단위)<br>
-    하체 <b>유지 모드</b>: 스쿼트 132.5 / 데드 155 고정, 증량 없음<br>
+    <b>메인 리프트</b>(벤치·인클라인·바벨로우): 전 세트 목표 횟수 달성 → 다음 주 +2.5kg<br>
+    <b>그 외 전 종목</b>: 마지막 세트를 표시된 상한까지 (상한 되면 멈춤). 상한 달성 시 자동 증량, 미달 시 유지<br>
+
     <b>디로드</b>: 5주 훈련 + 1주 (중량 60%, 세트 절반) — 상단 주차 표시 참고<br>
-    영양: 평일 3,100kcal · 수 3,400kcal · 단백질 145~170g · 수면 7시간+`;
+    영양: 평일 3,000~3,050kcal · 수 3,300kcal · 단백질 145~165g · 수면 7시간+`;
   view.appendChild(rules);
 }
 
@@ -440,17 +488,19 @@ function renderHistory(){
       st.sets.forEach(s=>{ total++; if(s.done){ done++; exDone++; vol += (st.w||0)*(s.r||0) } });
       if(exDone===0) return;
       const allDone = st.sets.every(s=>s.done);
-      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r );
+      const lastOk  = !ex.lastMin || ((st.sets[st.sets.length-1].r??0) >= ex.lastMin);
+      const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r ) && lastOk;
       const reps = st.sets.map(s=> s.done ? (s.r??0) : '–').join('/');
       const wTxt = st.w>0 ? `${st.w}kg` : '맨몸';
       let badge;
       if(!allDone){
         badge = `<span class="fb gray">미완료</span>`;
-      } else if(ex.prog===0 && day.key==='tue'){
-        judged++; badge = `<span class="fb gray">유지 모드</span>`;
+      } else if(ex.prog>0 && !ex.bw && !(st.w>0)){
+        judged++; hitCnt += allHit?1:0;
+        badge = `<span class="fb gray">중량 미기록</span>`;
       } else if(ex.prog===0){
         judged++; hitCnt += allHit?1:0;
-        badge = `<span class="fb gray">감각 유지</span>`;
+        badge = `<span class="fb gray">횟수 종목</span>`;
       } else if(allHit){
         judged++; hitCnt++;
         badge = `<span class="fb up">↑ 다음 ${(st.w+ex.prog).toFixed(1).replace(/\.0$/,'')}kg</span>`;
@@ -509,12 +559,13 @@ function renderHistory(){
   };
 }
 
-/* ══════════ 휴식 타이머 ══════════ */
-const timerEl = document.getElementById('timer');
-const timerLabel = document.getElementById('timerLabel');
-const timerClock = document.getElementById('timerClock');
-const timerBtn = document.getElementById('timerBtn');
-let tInt=null, tLeft=0;
+/* ══════════ 휴식 타이머 (시트) ══════════ */
+const tsheet=document.getElementById('tsheet'), tGrab=document.getElementById('tGrab');
+const tExName=document.getElementById('tExName'), tN=document.getElementById('tN'), tS=document.getElementById('tS');
+const tMiniN=document.getElementById('tMiniN'), tNext=document.getElementById('tNext'), tBar=document.getElementById('tBar');
+const tPlus=document.getElementById('tPlus'), tSkip=document.getElementById('tSkip');
+const CIRC=703.7;
+let tInt=null, tEndAt=0, tTotal=0, tDone=false, tLeft=0;
 let audioCtx=null;
 function beep(freq=880, dur=0.12, when=0){
   try{
@@ -528,54 +579,53 @@ function beep(freq=880, dur=0.12, when=0){
   }catch(e){}
 }
 function fmt(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
-let tEndAt = 0, tDone = false;
 function tick(){
   tLeft = Math.ceil((tEndAt - Date.now())/1000);
-  timerClock.textContent = fmt(Math.max(tLeft,0));
-  timerClock.className = 'clock num' + (tLeft<=10&&tLeft>0?' warn':'') + (tLeft<=0?' zero':'');
-  if(tLeft===10) beep(660,0.1);
+  const shown = fmt(Math.max(tLeft,0));
+  tN.textContent = shown; tMiniN.textContent = shown;
+  const ratio = Math.max(0, Math.min(1, (tEndAt-Date.now())/1000/tTotal));
+  tBar.style.strokeDashoffset = String(CIRC*(1-ratio));
+  tsheet.classList.toggle('warn', tLeft<=10 && tLeft>0);
+  if(tLeft===10 && !tsheet.dataset.warned){ tsheet.dataset.warned='1'; beep(660,0.1) }
   if(tLeft<=0 && !tDone){
-    tDone = true;
-    clearInterval(tInt);
+    tDone = true; clearInterval(tInt);
     beep(880,0.15,0); beep(880,0.15,0.25); beep(1100,0.3,0.5);
     if(navigator.vibrate) navigator.vibrate([200,100,200]);
-    timerLabel.innerHTML = '휴식 끝 — 다음 세트';
-    timerBtn.hidden = true;
-    setTimeout(resetTimer, 4000);
+    tsheet.classList.remove('warn'); tsheet.classList.add('zero');
+    tS.textContent='휴식 끝'; tN.textContent='GO'; tMiniN.textContent='GO';
+    setTimeout(hideTimer, 4000);
   }
 }
-function startTimer(sec, label){
+function startTimer(sec, info){
   clearInterval(tInt);
-  tEndAt = Date.now() + sec*1000;
-  tDone = false;
-  timerEl.classList.remove('idle');
-  timerLabel.innerHTML = label;
-  timerBtn.hidden = false;
-  timerClock.className='clock num';
-  timerClock.textContent = fmt(sec);
-  beep(660,0.08); // 시작음 (사용자 제스처 직후라 iOS OK)
+  tEndAt = Date.now() + sec*1000; tTotal = sec; tDone=false; delete tsheet.dataset.warned;
+  tExName.textContent = `${info.ex} · ${info.done}세트 완료`;
+  tS.textContent = `${fmt(sec)} 중`;
+  tNext.innerHTML = info.next ? `다음 <b>${info.next}</b>` : '';
+  tBar.style.strokeDashoffset='0';
+  tsheet.classList.remove('warn','zero','mini'); tsheet.classList.add('show');
+  tick(); beep(660,0.08);
   tInt = setInterval(tick, 250);
 }
+function stopTimer(msg){
+  clearInterval(tInt); tEndAt=0; tDone=true;
+  tExName.textContent = msg; tS.textContent=''; tNext.innerHTML='';
+  tN.textContent='✓'; tMiniN.textContent='✓';
+  tBar.style.strokeDashoffset='0';
+  tsheet.classList.remove('warn','mini'); tsheet.classList.add('show','zero');
+  setTimeout(hideTimer, 2500);
+}
+function hideTimer(){
+  clearInterval(tInt); tEndAt=0; tDone=false;
+  tsheet.classList.remove('show','warn','zero','mini');
+}
+tSkip.onclick = hideTimer;
+tPlus.onclick = ()=>{ if(!tEndAt||tDone) return; tEndAt += 30000; tTotal += 30; tS.textContent=`${fmt(tTotal)} 중`; delete tsheet.dataset.warned; tick() };
+tGrab.onclick = ()=>{ if(tsheet.classList.contains('show')) tsheet.classList.toggle('mini') };
 // 백그라운드 복귀 시 즉시 재계산 (화면 꺼짐/앱 전환 후에도 잔여시간 정확)
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && tEndAt && !tDone) tick();
 });
-function stopTimer(msg){
-  clearInterval(tInt);
-  timerLabel.innerHTML = msg || '완료';
-  timerClock.textContent='✓'; timerClock.className='clock num zero';
-  timerBtn.hidden = true;
-  setTimeout(resetTimer, 3000);
-}
-function resetTimer(){
-  clearInterval(tInt);
-  tEndAt = 0; tDone = false;
-  timerEl.classList.add('idle');
-  timerLabel.innerHTML = '세트 완료(✓)를 누르면<br>휴식 타이머가 시작됩니다';
-  timerClock.textContent='—'; timerClock.className='clock num';
-  timerBtn.hidden = true;
-}
-timerBtn.onclick = ()=>resetTimer();
 
 /* ══════════ 날짜 + 주차 ══════════ */
 const dateInput = document.getElementById('dateInput');
