@@ -124,10 +124,20 @@
     background:var(--panel); border-radius:28px 28px 0 0;
     box-shadow:0 -12px 40px rgba(0,0,0,.6);
     padding:10px 24px calc(22px + env(safe-area-inset-bottom));
-    transform:translateY(110%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    transform:translateY(110%); transition:transform .55s cubic-bezier(.34,1.45,.55,1);
     display:flex; flex-direction:column;
   }
   .tsheet.show{transform:translateY(0)}
+  @keyframes ringPop{0%{transform:scale(.55) rotate(-25deg);opacity:0} 60%{transform:scale(1.06) rotate(3deg);opacity:1} 100%{transform:scale(1) rotate(0)}}
+  @keyframes numPop{0%{transform:scale(.4);opacity:0} 55%{transform:scale(1.18)} 100%{transform:scale(1);opacity:1}}
+  @keyframes goBounce{0%{transform:scale(.6)} 40%{transform:scale(1.35)} 65%{transform:scale(.92)} 100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}}
+  .tsheet.enter .ring{animation:ringPop .6s cubic-bezier(.34,1.45,.55,1) both}
+  .tsheet.enter .ring .t .n{animation:numPop .5s .18s cubic-bezier(.34,1.45,.55,1) both}
+  .tsheet.enter .next,.tsheet.enter .btns{animation:numPop .4s .3s ease-out both}
+  .tsheet.zero .ring .t .n{animation:goBounce .6s cubic-bezier(.34,1.45,.55,1) both}
+  .tsheet.zero .ring{animation:shake .5s .1s ease-in-out}
+  .tsheet.warn .ring .t .n{animation:numPop .35s ease-out}
   .tsheet .handle{width:44px; height:5px; border-radius:3px; background:var(--line); margin:0 auto 14px}
   .tsheet .grab{min-height:var(--tap); margin:-10px -24px 0; padding:10px 24px 0; cursor:pointer}
   .tsheet .tex{font-size:.85rem; color:var(--ink-dim); font-weight:700}
@@ -161,7 +171,7 @@
   .tsheet.mini .mini-n{font-size:2.5rem; font-weight:900; margin-left:auto; line-height:1}
   .tsheet.mini.warn .mini-n{color:var(--amber)}
   .stripe,.mini-n{display:none} .tsheet.mini .stripe,.tsheet.mini .mini-n{display:block}
-  @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .ring .bar{transition:none} }
+  @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .ring .bar{transition:none} .tsheet *{animation:none!important} }
 
   /* ── 기록 화면 ─────────────────────── */
   .histcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
@@ -602,9 +612,14 @@ function startTimer(sec, info){
   tExName.textContent = `${info.ex} · ${info.done}세트 완료`;
   tS.textContent = `${fmt(sec)} 중`;
   tNext.innerHTML = info.next ? `다음 <b>${info.next}</b>` : '';
-  tBar.style.strokeDashoffset='0';
-  tsheet.classList.remove('warn','zero','mini'); tsheet.classList.add('show');
+  tsheet.classList.remove('warn','zero','mini','enter');
+  void tsheet.offsetWidth;                         // 애니메이션 재트리거
+  tsheet.classList.add('show','enter');
+  tBar.style.transition='none'; tBar.style.strokeDashoffset=String(CIRC);
+  void tBar.getBoundingClientRect();
+  tBar.style.transition='stroke-dashoffset .7s .15s cubic-bezier(.2,.8,.2,1), stroke .3s';
   tick(); beep(660,0.08);
+  setTimeout(()=>{ tBar.style.transition='stroke-dashoffset .25s linear, stroke .3s'; tsheet.classList.remove('enter') }, 900);
   tInt = setInterval(tick, 250);
 }
 function stopTimer(msg){
