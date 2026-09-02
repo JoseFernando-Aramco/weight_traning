@@ -429,7 +429,18 @@ function renderView(){
             const wTxt = st.w>0 ? `${st.w}kg × ` : (ex.bw ? '맨몸 × ' : '');
             const target = (ex.lastMin && nx===st.sets.length-1) ? `${ex.r}~${ex.lastMin}회` : `${ex.r}회`;
             startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`});
-          } else stopTimer(`${ex.n} 완료`);
+          } else {
+            // 종목 완료 → 다음 종목까지 전환 휴식 (양쪽 종목의 휴식 처방 평균, 90초~3분)
+            const nextEx = day.ex[xi+1];
+            if(nextEx){
+              const nst = data.ex[xi+1];
+              let trans = Math.round((ex.rest + nextEx.rest)/2/15)*15;
+              trans = Math.max(90, Math.min(180, trans));
+              const nw = nst && nst.w>0 ? `${nst.w}kg × ` : (nextEx.bw ? '맨몸 × ' : '');
+              startTimer(trans, {ex:ex.n, done:si+1, next:`${nextEx.n} · ${nw}${nextEx.r}회${nextEx.s>1?` ×${nextEx.s}세트`:''}`});
+              tExName.textContent = `${ex.n} 완료 — 종목 전환`;
+            } else stopTimer(`${ex.n} 완료 — 오늘 세션 끝`);
+          }
         } else {
           chk.classList.remove('on'); chk.textContent='○'; row.classList.remove('done');
         }
@@ -647,7 +658,35 @@ function hideTimer(){
 }
 tSkip.onclick = hideTimer;
 tPlus.onclick = ()=>{ if(!tEndAt||tDone) return; tEndAt += 30000; tTotal += 30; tS.textContent=`${fmt(tTotal)} 중`; delete tsheet.dataset.warned; tick() };
-tGrab.onclick = ()=>{ if(tsheet.classList.contains('show')) tsheet.classList.toggle('mini') };
+tGrab.onclick = ()=>{ if(tsheet.classList.contains('show') && !swiped) tsheet.classList.toggle('mini') };
+
+/* 스와이프: 아래로 끌면 접히고, 접힌 상태에서 위로 끌면 펼쳐짐 */
+let sy=0, dy=0, dragging=false, swiped=false;
+tsheet.addEventListener('touchstart', e=>{
+  if(!tsheet.classList.contains('show')) return;
+  if(e.target.closest('button')) return;           // 버튼 위 터치는 제외
+  sy = e.touches[0].clientY; dy=0; dragging=true; swiped=false;
+  tsheet.style.transition='none';
+}, {passive:true});
+tsheet.addEventListener('touchmove', e=>{
+  if(!dragging) return;
+  dy = e.touches[0].clientY - sy;
+  const mini = tsheet.classList.contains('mini');
+  // 펼친 상태: 아래로만 / 접힌 상태: 위로만 따라오게
+  const follow = mini ? Math.min(0, dy) : Math.max(0, dy);
+  tsheet.style.transform = `translateY(${follow}px)`;
+  if(Math.abs(dy)>8) swiped=true;
+}, {passive:true});
+function endDrag(){
+  if(!dragging) return; dragging=false;
+  tsheet.style.transition=''; tsheet.style.transform='';
+  const mini = tsheet.classList.contains('mini');
+  if(!mini && dy>60) tsheet.classList.add('mini');
+  else if(mini && dy<-40) tsheet.classList.remove('mini');
+  setTimeout(()=>{ swiped=false }, 50);          // 스와이프 직후 click 토글 방지
+}
+tsheet.addEventListener('touchend', endDrag);
+tsheet.addEventListener('touchcancel', endDrag);
 // 백그라운드 복귀 시 즉시 재계산 (화면 꺼짐/앱 전환 후에도 잔여시간 정확)
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && tEndAt && !tDone) tick();
@@ -656,10 +695,22 @@ document.addEventListener('visibilitychange', ()=>{
 /* ══════════ 날짜 + 주차 ══════════ */
 const dateInput = document.getElementById('dateInput');
 dateInput.value = curDate;
-dateInput.addEventListener('change', ()=>{ curDate = dateInput.value || todayISO(); renderView() });
+let dateManual = false;
+dateInput.addEventListener('change', ()=>{ dateManual = true; curDate = dateInput.value || todayISO(); renderView() });
 
-// 3주차 시작일 = 2026-08-31 (정상 중량 복귀). 이후 5+1 디로드 사이클 표시
-const CYCLE_START = new Date('2026-08-31T00:00:00');
+// 앱이 오래 열려 있다가 다시 보일 때: 사용자가 날짜를 직접 고른 게 아니면 오늘로 갱신
+function refreshDateIfStale(){
+  const today = todayISO();
+  if(dateManual || curDate === today) return;
+  curDate = today; dateInput.value = today;
+  renderView(); renderWeek();
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshDateIfStale() });
+window.addEventListener('pageshow', refreshDateIfStale);
+window.addEventListener('focus', refreshDateIfStale);
+
+// 프로그램 1주차 시작일 = 2026-08-24. 이후 5주 훈련 + 1주 디로드 사이클 표시
+const CYCLE_START = new Date('2026-08-24T00:00:00');
 function weekInfo(){
   const now = new Date(curDate+'T00:00:00');
   const diff = Math.floor((now - CYCLE_START)/(7*24*3600*1000));
