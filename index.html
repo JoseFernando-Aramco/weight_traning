@@ -121,6 +121,7 @@
 
   /* ── 휴식 타이머 시트 ─────────────────── */
   .tsheet{
+    touch-action:none;
     position:fixed; left:0; right:0; bottom:0; z-index:50;
     background:var(--panel); border-radius:28px 28px 0 0;
     box-shadow:0 -12px 40px rgba(0,0,0,.6);
@@ -156,7 +157,7 @@
   .tsheet .next{text-align:center; font-size:.85rem; color:var(--ink-dim); margin-top:6px; min-height:1.3em}
   .tsheet .next b{color:var(--ink)}
   .tsheet .btns{display:flex; gap:10px; margin-top:18px}
-  .tsheet .btns button{flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line);
+  .tsheet .btns button{touch-action:manipulation; flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line);
     background:var(--panel-2); color:var(--ink); font:inherit; font-weight:800; font-size:.95rem; cursor:pointer}
   .tsheet .btns button.primary{background:var(--amber); color:#1f2226; border-color:var(--amber)}
   .tsheet .btns button:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
@@ -263,15 +264,18 @@ const PROGRAM = [
     {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
     {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
    ]},
- { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 (컴팩트)", time:"약 55분",
-   note:"유지+근력 모드: 무겁게, 적게, 깔끔하게. 스쿼트·데드는 마지막 세트 7회 상한 AMRAP — 7회 달성 시에만 증량.",
-   warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 115×2<br><b>데드:</b> 60×5 → 100×3 → 135×1 (벨트 착용)",
+ { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 + 어깨", time:"약 55분",
+   note:"풋살 전날 경량 하체 + 어깨 미니 세션. 스쿼트는 72%에서 RIR 3 고정, 데드는 격주 1세트, 무릎 위화감 있으면 깊이를 줄이거나 핵스쿼트로 대체. 어깨 3종은 가볍게 — 수요일 풀업에 지장 없는 고립 종목만.",
+   warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 110×2<br><b>데드(격주):</b> 60×5 → 100×3 → 125×1 (벨트)",
    ex:[
-    {n:"백스쿼트", w:132.5, s:3, r:5, rest:180, cue:"마지막 세트는 최대 7회까지 (7회 되면 멈춤). 7회 나오면 다음 주 +2.5kg", prog:2.5, lastMin:7},
-    {n:"컨벤셔널 데드리프트", w:155, s:2, r:5, rest:180, cue:"마지막 세트는 최대 7회까지 (7회 되면 멈춤). 7회 나오면 다음 주 +2.5kg", prog:2.5, lastMin:7},
+    {n:"백스쿼트", w:125, s:3, r:5, rest:180, cue:"72%, RIR 3에서 정지. 증량 없음 — 3주 이상 가뿐하면 +2.5 수동 조정", prog:0},
+    {n:"컨벤셔널 데드리프트", w:145, s:1, r:5, rest:180, cue:"격주 1세트만 (짝수 주). 안 하는 주는 비워두기 — 기록에 영향 없음", prog:0, opt:true},
     {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"행잉 레그레이즈", w:0, s:3, r:12, rest:90, cue:"골반을 말아 올리기 — 다리만 들면 허벅지 운동. 힘들면 니레이즈로", prog:0}
+    {n:"행잉 레그레이즈", w:0, s:3, r:12, rest:90, cue:"골반을 말아 올리기 — 다리만 들면 허벅지 운동. 힘들면 니레이즈로", prog:0},
+    {n:"케이블 사이드 레터럴", w:0, s:4, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
+    {n:"리어 델트 플라이", w:0, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", prog:2, lastMin:18},
+    {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", prog:0}
    ]},
  { key:"wed", tab:"수", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화", time:"약 60분 + 풋살 20–22시",
    note:"17시 전 종료 → 18시 탄수화물 식사 → 풋살. 바쁜 주는 1·2·3번만(40분). 큐: 손은 고리, 팔꿈치로 당긴다.",
@@ -486,7 +490,8 @@ function renderView(){
   rules.className='rules';
   rules.innerHTML = `<h3>운영 규칙</h3>
     <b>메인 리프트</b>(벤치·인클라인·바벨로우): 전 세트 목표 횟수 달성 → 다음 주 +2.5kg<br>
-    <b>그 외 전 종목</b>: 마지막 세트를 표시된 상한까지 (상한 되면 멈춤). 상한 달성 시 자동 증량, 미달 시 유지<br>
+    <b>보조 종목</b>: 마지막 세트를 표시된 상한까지 (상한 되면 멈춤). 상한 달성 시 자동 증량, 미달 시 유지<br>
+    <b>하체</b>: 유지 모드 — 스쿼트 125 고정(RIR 3), 데드는 격주 1세트. 풋살 전날이라 한계 도전 없음<br>
 
     <b>디로드</b>: 5주 훈련 + 1주 (중량 60%, 세트 절반) — 상단 주차 표시 참고<br>
     영양: 평일 3,000~3,050kcal · 수 3,300kcal · 단백질 145~165g · 수면 7시간+`;
@@ -507,8 +512,9 @@ function renderHistory(){
     data.ex.forEach((st,xi)=>{
       const ex = day.ex[xi]; if(!ex) return;
       let exDone=0;
-      st.sets.forEach(s=>{ total++; if(s.done){ done++; exDone++; vol += (st.w||0)*(s.r||0) } });
-      if(exDone===0) return;
+      st.sets.forEach(s=>{ if(s.done){ exDone++ } });
+      if(exDone===0){ if(!ex.opt) total += st.sets.length; return }
+      st.sets.forEach(s=>{ total++; if(s.done){ done++; vol += (st.w||0)*(s.r||0) } });
       const allDone = st.sets.every(s=>s.done);
       const lastOk  = !ex.lastMin || ((st.sets[st.sets.length-1].r??0) >= ex.lastMin);
       const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r ) && lastOk;
@@ -670,13 +676,14 @@ tsheet.addEventListener('touchstart', e=>{
 }, {passive:true});
 tsheet.addEventListener('touchmove', e=>{
   if(!dragging) return;
+  e.preventDefault();                              // 배경 스크롤 차단
   dy = e.touches[0].clientY - sy;
   const mini = tsheet.classList.contains('mini');
   // 펼친 상태: 아래로만 / 접힌 상태: 위로만 따라오게
   const follow = mini ? Math.min(0, dy) : Math.max(0, dy);
   tsheet.style.transform = `translateY(${follow}px)`;
   if(Math.abs(dy)>8) swiped=true;
-}, {passive:true});
+}, {passive:false});
 function endDrag(){
   if(!dragging) return; dragging=false;
   tsheet.style.transition=''; tsheet.style.transform='';
