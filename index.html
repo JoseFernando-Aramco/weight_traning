@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#24272c">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="쇠질로그">
@@ -35,7 +35,7 @@
   .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
 
   /* ── 헤더 ─────────────────────────── */
-  header{padding:20px 16px 8px; max-width:640px; margin:0 auto}
+  header{padding:calc(20px + env(safe-area-inset-top)) 16px 8px; max-width:640px; margin:0 auto}
   .brand{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
   .brand h1{margin:0; font-size:1.35rem; font-weight:800; letter-spacing:-.02em}
   .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600}
