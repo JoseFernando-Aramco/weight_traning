@@ -37,8 +37,9 @@
   /* ── 헤더 ─────────────────────────── */
   header{padding:calc(20px + env(safe-area-inset-top)) 16px 8px; max-width:640px; margin:0 auto}
   .brand{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
-  .brand h1{margin:0; font-size:1.35rem; font-weight:800; letter-spacing:-.02em}
-  .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600}
+  .brand h1{margin:0; line-height:0}
+  .brand .logo{height:34px; width:auto; display:block}
+  .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600; padding-bottom:6px}
   .datebar{display:flex; align-items:center; gap:8px; margin-top:10px}
   .datebar input[type=date]{
     background:var(--panel); border:1px solid var(--line); color:var(--ink);
@@ -223,7 +224,7 @@
 
 <header>
   <div class="brand">
-    <h1>쇠질로그</h1>
+    <h1><img src="icons/logo-wordmark.png?v=2" alt="쇠질로그" class="logo"></h1>
     <span class="sub">상체 집중 5분할 · 하체 유지 · 가슴 우선</span>
   </div>
   <div class="datebar">
