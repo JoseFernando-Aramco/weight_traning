@@ -566,11 +566,11 @@ function renderHistory(){
   }
   const tools = document.createElement('div');
   tools.className='toolrow';
-  tools.innerHTML = `<button id="expBtn">기록 내보내기 (백업)</button><button id="impBtn">기록 불러오기</button>`;
+  tools.innerHTML = `<button id="expBtn">백업 내보내기 (기록 + 이월 중량)</button><button id="impBtn">기록 불러오기</button>`;
   view.appendChild(tools);
   document.getElementById('expBtn').onclick = ()=>{
     const dump = {};
-    store.keys().filter(k=>k.startsWith('log:')).forEach(k=>dump[k]=store.get(k));
+    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')).forEach(k=>dump[k]=store.get(k));
     const blob = new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `쇠질로그_백업_${todayISO()}.json`; a.click();
@@ -583,7 +583,8 @@ function renderHistory(){
       const rd = new FileReader();
       rd.onload = ()=>{ try{
         const dump = JSON.parse(rd.result);
-        Object.entries(dump).forEach(([k,v])=>{ if(k.startsWith('log:')) store.set(k,v) });
+        Object.entries(dump).forEach(([k,v])=>{ if(k.startsWith('log:')||k.startsWith('cur:')) store.set(k,v) });
+        alert('기록과 이월 중량을 불러왔습니다');
         renderHistory();
       }catch(e){ alert('파일 형식을 읽을 수 없습니다') } };
       rd.readAsText(f);
