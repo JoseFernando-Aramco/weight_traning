@@ -40,6 +40,8 @@
   .brand h1{margin:0; line-height:0}
   .brand .logo{height:34px; width:auto; display:block}
   .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600; padding-bottom:6px}
+  .brand .tag{color:var(--ink); font-style:italic; font-weight:700; font-size:.9rem; letter-spacing:-.01em; padding-bottom:6px; white-space:nowrap}
+  .brand .tag b{color:#8bea1c; font-style:italic}
   .datebar{display:flex; align-items:center; gap:8px; margin-top:10px}
   .datebar input[type=date]{
     background:var(--panel); border:1px solid var(--line); color:var(--ink);
@@ -225,7 +227,7 @@
 <header>
   <div class="brand">
     <h1><img src="icons/logo-wordmark.png?v=2" alt="쇠질로그" class="logo"></h1>
-    <span class="sub">상체 집중 5분할 · 하체 유지 · 가슴 우선</span>
+    <span class="tag">The Iron never <b>lies.</b></span>
   </div>
   <div class="datebar">
     <input type="date" id="dateInput" aria-label="운동 날짜">
