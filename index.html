@@ -66,10 +66,10 @@
     border:1px solid var(--line); padding:8px 12px; border-radius:999px; font-weight:700}
 
   /* ── 요일 탭: 원판 컬러 ───────────── */
-  nav{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:12px 16px; max-width:640px; margin:0 auto}
+  nav{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; padding:12px 12px; max-width:640px; margin:0 auto}
   nav button{
     min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
-    background:var(--panel); color:var(--ink-dim); font:inherit; font-weight:800; font-size:.85rem;
+    background:var(--panel); color:var(--ink-dim); font:inherit; font-weight:800; font-size:.8rem; padding:0 2px;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer;
   }
   nav button .dot{width:10px; height:10px; border-radius:50%; background:var(--c,transparent);
@@ -198,6 +198,24 @@
   .stripe,.mini-n{display:none} .tsheet.mini .stripe,.tsheet.mini .mini-n{display:block}
   @media (prefers-reduced-motion:reduce){ .tsheet{transition:none} .tsheet *{animation:none!important} }
 
+  /* ── 스프린트/유산소 화면 ─────────────── */
+  .cfgrow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 4px; min-height:var(--tap)}
+  .cfgrow label{color:var(--ink-dim); font-size:.9rem; font-weight:600}
+  .stepper{display:flex; align-items:center; gap:6px}
+  .stepper button{min-width:var(--tap); min-height:var(--tap); border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:inherit; font-size:1.2rem; font-weight:800; cursor:pointer}
+  .stepper b{min-width:2.4em; text-align:center; font-size:1.05rem}
+  .txt{min-height:var(--tap); background:var(--panel-2); border:1px solid var(--line); border-radius:10px; color:var(--ink); font:inherit; font-weight:700; padding:8px 12px; width:60%}
+  .txt:focus{outline:2px solid var(--amber); outline-offset:-1px}
+  .sprbox{padding:18px 16px 16px; text-align:center}
+  .sprphase{color:var(--ink-dim); font-size:.9rem; font-weight:700}
+  .sprbig{font-size:clamp(56px,20vw,84px); font-weight:900; line-height:1.1; margin:6px 0 2px}
+  .sprsub{color:var(--ink-dim); font-size:.85rem; min-height:1.3em}
+  .sprbar{height:6px; background:var(--panel-2); border-radius:3px; margin:14px 0 16px; overflow:hidden}
+  .sprbar div{height:100%; width:0; background:#ff7a45; transition:width .3s linear}
+  .sprbox .btns{display:flex; gap:10px}
+  .sprbox .btns button{flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:inherit; font-weight:800; font-size:.95rem; cursor:pointer}
+  .sprbox .btns button.primary{background:#ff7a45; color:#1f2226; border-color:#ff7a45}
+  .sprhint{color:var(--ink-faint); font-size:.78rem; margin-top:12px; line-height:1.5}
   /* ── 기록 화면 ─────────────────────── */
   .histcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     padding:14px 16px; margin-bottom:10px}
@@ -279,7 +297,7 @@
 <script>
 /* ══════════ 프로그램 데이터 ══════════ */
 const PROGRAM = [
- { key:"mon", tab:"월", color:"var(--plate-red)", name:"밀기 A — 가슴 주도", time:"약 70분",
+ { key:"mon", tab:"월", color:"var(--plate-red)", name:"밀기 A — 가슴 주도", time:"약 75분",
    note:"주간 최고 컨디션을 벤치에 씁니다. 견갑 후인하강 고정, 바닥에서 가슴으로 밀기.",
    warm:"유산소 3분 → 암서클 전후 각 10회 → 밴드 풀어파트 15×2 → 푸시업 10회<br><b>벤치:</b> 빈봉×10 → 40×8 → 60×5 → 75×3 → 85×1<br><b>시티드 딥:</b> 합 20kg×8",
    ex:[
@@ -287,7 +305,8 @@ const PROGRAM = [
     {n:"인클라인 덤벨프레스", w:30, s:3, r:10, rest:120, cue:"RIR 2 — 한쪽 덤벨 무게 기준 · 마지막 세트 최대 12회", prog:2, lastMin:12},
     {n:"시티드 딥 (해머)", w:40, s:3, r:8, rest:150, cue:"양쪽 합 원판 무게 기입. 팔꿈치 45도, 좌석 낮게. 돌아올 때 2초 · 마지막 세트 최대 10회", prog:5, lastMin:10},
     {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
-    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
+    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고. 첫 2주는 2세트 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
    ]},
  { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 + 어깨", time:"약 55분",
    note:"풋살 전날 경량 하체 + 어깨 미니 세션. 스쿼트는 72%에서 RIR 3 고정, 데드는 격주 1세트, 무릎 위화감 있으면 깊이를 줄이거나 핵스쿼트로 대체. 어깨 3종은 가볍게 — 수요일 풀업에 지장 없는 고립 종목만.",
@@ -313,7 +332,7 @@ const PROGRAM = [
     {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14},
     {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14}
    ]},
- { key:"thu", tab:"목", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨", time:"약 65분",
+ { key:"thu", tab:"목", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨", time:"약 70분",
    note:"풋살 다음날 — 유난히 무거우면 인클라인 5% 감량. 플라이는 큰 호를 그리기.",
    warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
    ex:[
@@ -321,7 +340,8 @@ const PROGRAM = [
     {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"체스트 플라이 머신 (gym80)", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
     {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
-    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18}
+    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18},
+    {n:"앱 휠 롤아웃", w:0, s:3, r:10, rest:60, cue:"무릎 꿇고, 엉덩이 살짝 말기, 허리 버티는 거리까지만. 첫 2주는 2세트", prog:0}
    ]},
  { key:"fri", tab:"금", color:"var(--plate-white)", name:"당기기 B + 팔·복근", time:"약 70분",
    note:"원암 로우: 팔꿈치를 골반 쪽으로 — 광배 하부. 컬+익스텐션은 슈퍼세트 가능(5분 단축).",
@@ -335,6 +355,10 @@ const PROGRAM = [
     {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"케이블 크런치", w:23, s:3, r:12, rest:90, cue:"엉덩이 고정, 흉곽을 골반 쪽으로. 팔로 당기지 말기 (50lb≈23kg 시작) · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
    ]}
+];
+const CARDIO = [
+ { key:"sat", tab:"토", color:"#ff7a45", name:"반복 스프린트 인터벌", type:"sprint" },
+ { key:"sun", tab:"일", color:"#5fb3c9", name:"유산소 기초 (Zone 2)", type:"zone2" }
 ];
 const HIST_TAB = { key:"hist", tab:"기록", color:"var(--ink-faint)" };
 
@@ -351,13 +375,13 @@ const skey = (date, day) => `log:${date}:${day}`;
 /* ══════════ 상태 ══════════ */
 const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10) };
 let curDate = todayISO();
-let curTab = (()=>{ const dow = new Date().getDay(); return [null,"mon","tue","wed","thu","fri",null][dow] || "mon" })();
+let curTab = (()=>{ const dow = new Date().getDay(); return ["sun","mon","tue","wed","thu","fri","sat"][dow] || "mon" })();
 
 /* ══════════ 탭 ══════════ */
 const tabsEl = document.getElementById('tabs');
 function renderTabs(){
   tabsEl.innerHTML = '';
-  [...PROGRAM, HIST_TAB].forEach(d=>{
+  [...PROGRAM, ...CARDIO, HIST_TAB].forEach(d=>{
     const b = document.createElement('button');
     b.style.setProperty('--c', d.color);
     b.className = curTab===d.key ? 'on' : '';
@@ -386,6 +410,8 @@ function saveSession(dayKey, data){
 const view = document.getElementById('view');
 function renderView(){
   if(curTab==='hist'){ renderHistory(); return }
+  if(curTab==='sat'){ renderSprint(); return }
+  if(curTab==='sun'){ renderZone2(); return }
   const day = PROGRAM.find(d=>d.key===curTab);
   const data = loadSession(day.key);
   view.innerHTML = '';
@@ -530,6 +556,19 @@ function renderHistory(){
   let shown = 0;
   keys.forEach(k=>{
     const [,date,dayKey] = k.split(':');
+    const cday = CARDIO.find(d=>d.key===dayKey);
+    if(cday){
+      let cd; try{ cd = JSON.parse(store.get(k)) }catch(e){ return }
+      if(!cd || !cd.done) return;
+      shown++;
+      const card = document.createElement('div');
+      card.className='histcard'; card.style.setProperty('--c', cday.color);
+      card.innerHTML = `<div class="top"><span class="dot"></span>${cday.name}<span class="d num">${date}</span></div>
+        <div class="hstats num">${cd.summary||''} <span class="vd ok">완료</span></div>
+        <button class="del">이 기록 삭제</button>`;
+      card.querySelector('.del').onclick = ()=>{ if(confirm(`${date} ${cday.name} 기록을 삭제할까요?`)){ store.del(k); renderHistory() } };
+      view.appendChild(card); return;
+    }
     const day = PROGRAM.find(d=>d.key===dayKey); if(!day) return;
     let data; try{ data = JSON.parse(store.get(k)) }catch(e){ return }
     let done=0, total=0, vol=0, hitCnt=0, judged=0;
@@ -610,6 +649,154 @@ function renderHistory(){
       rd.readAsText(f);
     };
     inp.click();
+  };
+}
+
+/* ══════════ 토요일: 반복 스프린트 (오디오 가이드) ══════════ */
+const SPR_KEY='cfg:sprint';
+function sprintCfg(){
+  const d={reps:8, perSet:4, recover:30, setRest:120, lead:30, window:8};
+  try{ return Object.assign(d, JSON.parse(store.get(SPR_KEY)||'{}')) }catch(e){ return d }
+}
+/* 일정표: [{t, kind}] kind = go | rest | end, 카운트다운은 재생 시 자동 */
+function sprintSchedule(c){
+  const ev=[]; let t=c.lead;
+  for(let i=1;i<=c.reps;i++){
+    ev.push({t, kind:'go', rep:i});
+    if(i===c.reps){ t+=c.window+5; ev.push({t, kind:'end'}); break }
+    t += c.window + ((i % c.perSet===0) ? c.setRest : c.recover);
+    if(i % c.perSet===0) ev.push({t: t-c.setRest+c.window*0, kind:'rest'}); // 세트 휴식 시작 알림
+  }
+  return ev.sort((a,b)=>a.t-b.t);
+}
+/* WAV 렌더링: 8kHz 8bit mono, 전 구간 신호음 굽기 → <audio>로 재생하면 화면 꺼져도 이어짐 */
+function buildSprintWav(c){
+  const sr=8000, ev=sprintSchedule(c), total=Math.ceil(ev[ev.length-1].t+3);
+  const n=sr*total, pcm=new Float32Array(n);
+  const tone=(t0,dur,f,amp=0.9)=>{ const s0=Math.floor(t0*sr), s1=Math.min(n,Math.floor((t0+dur)*sr));
+    for(let i=s0;i<s1;i++){ const x=(i-s0)/sr; const env=Math.min(1,x*40,(s1-i)/sr*40); pcm[i]+=amp*env*Math.sin(2*Math.PI*f*x) } };
+  const countdown=t=>{ tone(t-3,0.12,880); tone(t-2,0.12,880); tone(t-1,0.12,880) };
+  ev.forEach(e=>{
+    if(e.kind==='go'){ countdown(e.t); tone(e.t,0.9,1320) }                       // 출발: 긴 고음
+    else if(e.kind==='rest'){ tone(e.t,0.35,440); tone(e.t+0.45,0.35,440) }        // 세트 휴식: 저음 2회
+    else if(e.kind==='end'){ tone(e.t,0.3,880); tone(e.t+0.4,0.3,1100); tone(e.t+0.8,0.7,1320) } // 종료: 상승 3음
+  });
+  // 시작 안내: 재생 즉시 짧은 음 1회 (이어폰 연결 확인용)
+  tone(0.2,0.15,880);
+  const buf=new ArrayBuffer(44+n), v=new DataView(buf);
+  const ws=(o,str)=>{for(let i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i))};
+  ws(0,'RIFF'); v.setUint32(4,36+n,true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr,true); v.setUint16(32,1,true); v.setUint16(34,8,true);
+  ws(36,'data'); v.setUint32(40,n,true);
+  for(let i=0;i<n;i++) v.setUint8(44+i, Math.max(0,Math.min(255, Math.round(128+pcm[i]*120))));
+  return {blob:new Blob([buf],{type:'audio/wav'}), ev, total};
+}
+let sprAudio=null, sprEv=[], sprTotal=0, sprRaf=null;
+function fmtS(s){ s=Math.max(0,Math.round(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
+function renderSprint(){
+  const c=sprintCfg();
+  view.innerHTML='';
+  const rawLog=store.get(skey(curDate,'sat')); let log=null; try{ log=rawLog?JSON.parse(rawLog):null }catch(e){}
+  const wrap=document.createElement('div');
+  wrap.innerHTML=`
+    <div class="dayhead" style="--c:#ff7a45"><span class="plate"></span><h2>반복 스프린트 인터벌</h2><span class="time num">약 ${Math.round((sprintSchedule(c).slice(-1)[0].t)/60)+10}분</span></div>
+    <p class="daynote">30m 스프린트 90% → 걸어서 복귀. 이어폰만 끼고 폰은 내려두세요. <b>긴 고음 = 출발</b>, 짧은 삑 3번 = 3초 전, 저음 2번 = 세트 휴식 시작, 상승 3음 = 종료.</p>
+    <details class="warm"><summary>워밍업 · 마무리</summary><div class="body">조깅 5분 → 레그스윙, 워킹 런지, 하이니, 버트킥 → 가속 60·75% 2본<br><b>끝나고</b> 걷기 5분. 햄스트링 당김 신호 있으면 즉시 중단</div></details>
+    <section class="ex" style="--c:#ff7a45">
+      <div class="ex-head"><span class="order num">1</span><div><div class="name">세션 설정</div><div class="meta">주차별 진행: 1~2주 8본 / 3~4주 10본·복귀 25초 / 디로드 6본 / 이후 12본</div></div></div>
+      <div class="sets">
+        <div class="cfgrow"><label>스프린트 본 수</label><div class="stepper"><button data-k="reps" data-d="-1">−</button><b class="num" id="v-reps">${c.reps}</b><button data-k="reps" data-d="1">+</button></div></div>
+        <div class="cfgrow"><label>복귀 시간 (초)</label><div class="stepper"><button data-k="recover" data-d="-5">−</button><b class="num" id="v-recover">${c.recover}</b><button data-k="recover" data-d="5">+</button></div></div>
+        <div class="cfgrow"><label>세트당 본 수</label><div class="stepper"><button data-k="perSet" data-d="-1">−</button><b class="num" id="v-perSet">${c.perSet}</b><button data-k="perSet" data-d="1">+</button></div></div>
+        <div class="cfgrow"><label>세트 간 휴식 (초)</label><div class="stepper"><button data-k="setRest" data-d="-30">−</button><b class="num" id="v-setRest">${c.setRest}</b><button data-k="setRest" data-d="30">+</button></div></div>
+        <div class="cfgrow"><label>시작 전 대기 (초)</label><div class="stepper"><button data-k="lead" data-d="-10">−</button><b class="num" id="v-lead">${c.lead}</b><button data-k="lead" data-d="10">+</button></div></div>
+      </div>
+    </section>
+    <section class="ex" style="--c:#ff7a45">
+      <div class="sprbox">
+        <div class="sprphase" id="sprPhase">준비되면 시작을 누르세요</div>
+        <div class="sprbig num" id="sprBig">—</div>
+        <div class="sprsub num" id="sprSub"></div>
+        <div class="sprbar"><div id="sprFill"></div></div>
+        <div class="btns"><button id="sprStart" class="primary" type="button">오디오 가이드 시작</button><button id="sprStop" type="button" hidden>중단</button></div>
+        <div class="sprhint">시작 버튼을 누른 뒤 폰을 주머니에 넣거나 내려두세요. 화면이 꺼져도 신호음은 이어폰으로 계속 나옵니다.</div>
+      </div>
+    </section>
+    <div class="prog num ${log&&log.done?'hit':''}" style="${log&&log.done?'display:block':''}">${log&&log.done?`오늘 완료 — ${log.summary}`:''}</div>`;
+  view.appendChild(wrap);
+
+  wrap.querySelectorAll('.stepper button').forEach(b=>{
+    b.onclick=()=>{
+      const k=b.dataset.k, d=parseInt(b.dataset.d,10), cfg=sprintCfg();
+      const min={reps:4,recover:15,perSet:2,setRest:60,lead:10}[k], max={reps:16,recover:90,perSet:8,setRest:240,lead:120}[k];
+      cfg[k]=Math.max(min,Math.min(max,cfg[k]+d)); store.set(SPR_KEY, JSON.stringify(cfg));
+      renderSprint();
+    };
+  });
+
+  const phase=wrap.querySelector('#sprPhase'), big=wrap.querySelector('#sprBig'), sub=wrap.querySelector('#sprSub'), fill=wrap.querySelector('#sprFill');
+  const bStart=wrap.querySelector('#sprStart'), bStop=wrap.querySelector('#sprStop');
+
+  function syncUI(){
+    if(!sprAudio) return;
+    const t=sprAudio.currentTime;
+    // 현재 구간 판정
+    let next=sprEv.find(e=>e.t>t && e.kind==='go'); let last=[...sprEv].reverse().find(e=>e.t<=t);
+    const done=sprEv.filter(e=>e.kind==='go'&&e.t<=t).length;
+    if(!last){ phase.textContent=`출발선으로 — 첫 스프린트까지`; big.textContent=fmtS(sprEv[0].t-t); sub.textContent=`총 ${c.reps}본`; }
+    else if(last.kind==='end' || t>=sprTotal-0.5){ phase.textContent='세션 완료'; big.textContent='끝'; sub.textContent=`${c.reps}본 완료 — 걷기 5분`; }
+    else if(t < last.t + c.window && last.kind==='go'){ phase.textContent=`스프린트 ${last.rep}/${c.reps}`; big.textContent='GO'; sub.textContent='90%'; }
+    else if(next){ const inSetRest = sprEv.some(e=>e.kind==='rest'&&e.t<=t&&e.t>last.t-1) || (last.kind==='rest');
+      phase.textContent= inSetRest ? `세트 휴식 — ${done}/${c.reps}본 완료` : `걸어서 복귀 — ${done}/${c.reps}본 완료`;
+      big.textContent=fmtS(next.t-t); sub.textContent=`다음 ${next.rep}본 출발까지`; }
+    fill.style.width=`${Math.min(100,t/sprTotal*100)}%`;
+    sprRaf=requestAnimationFrame(syncUI);
+  }
+  function finish(saveLog){
+    if(sprRaf){ cancelAnimationFrame(sprRaf); sprRaf=null }
+    if(sprAudio){ sprAudio.pause(); sprAudio=null }
+    bStart.hidden=false; bStop.hidden=true;
+    if(saveLog){
+      const summary=`${c.reps}본 · 복귀 ${c.recover}초 · 세트당 ${c.perSet}본`;
+      store.set(skey(curDate,'sat'), JSON.stringify({done:true, summary, cfg:c}));
+      renderSprint();
+    }
+  }
+  bStart.onclick=()=>{
+    const {blob,ev,total}=buildSprintWav(c);
+    sprEv=ev; sprTotal=total;
+    if(sprAudio){ sprAudio.pause() }
+    sprAudio=new Audio(URL.createObjectURL(blob)); sprAudio.setAttribute('playsinline','');
+    sprAudio.onended=()=>finish(true);
+    sprAudio.play().then(()=>{ bStart.hidden=true; bStop.hidden=false; syncUI() }).catch(()=>{ phase.textContent='재생 실패 — 다시 눌러주세요' });
+  };
+  bStop.onclick=()=>{ if(confirm('세션을 중단할까요? (기록되지 않음)')) finish(false) };
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && sprAudio && !sprRaf) syncUI() });
+}
+
+/* ══════════ 일요일: Zone 2 ══════════ */
+function renderZone2(){
+  view.innerHTML='';
+  const rawLog=store.get(skey(curDate,'sun')); let log=null; try{ log=rawLog?JSON.parse(rawLog):null }catch(e){}
+  const wrap=document.createElement('div');
+  wrap.innerHTML=`
+    <div class="dayhead" style="--c:#5fb3c9"><span class="plate"></span><h2>유산소 기초 (Zone 2)</h2><span class="time">30~40분</span></div>
+    <p class="daynote">자전거·빠른 걷기·가벼운 조깅. <b>대화가 가능한 강도</b>(심박 130~140). 스프린트 사이 회복 속도를 만드는 엔진입니다. 딸과 물놀이도 인정.</p>
+    <section class="ex" style="--c:#5fb3c9">
+      <div class="ex-head"><span class="order num">1</span><div><div class="name">오늘 활동 기록</div><div class="meta">종류와 시간만 적어두면 됩니다</div></div></div>
+      <div class="sets">
+        <div class="cfgrow"><label>활동</label><input class="txt" id="z2type" placeholder="자전거 / 걷기 / 조깅 …" value="${log?.type||''}"></div>
+        <div class="cfgrow"><label>시간 (분)</label><input class="txt num" id="z2min" type="number" inputmode="numeric" placeholder="35" value="${log?.min||''}"></div>
+        <div class="btns" style="margin-top:12px"><button id="z2save" class="primary" type="button">${log&&log.done?'수정 저장':'완료로 기록'}</button></div>
+      </div>
+    </section>
+    <div class="prog num ${log&&log.done?'hit':''}" style="${log&&log.done?'display:block':''}">${log&&log.done?`완료 — ${log.summary}`:''}</div>`;
+  view.appendChild(wrap);
+  wrap.querySelector('#z2save').onclick=()=>{
+    const type=wrap.querySelector('#z2type').value.trim()||'유산소', min=parseInt(wrap.querySelector('#z2min').value,10)||0;
+    store.set(skey(curDate,'sun'), JSON.stringify({done:true, type, min, summary:`${type} ${min}분`}));
+    renderZone2();
   };
 }
 
