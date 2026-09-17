@@ -306,7 +306,7 @@ const PROGRAM = [
     {n:"시티드 딥 (해머)", w:40, s:3, r:8, rest:150, cue:"양쪽 합 원판 무게 기입. 팔꿈치 45도, 좌석 낮게. 돌아올 때 2초 · 마지막 세트 최대 10회", prog:5, lastMin:10},
     {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
     {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고. 첫 2주는 2세트 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
    ]},
  { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 + 어깨", time:"약 55분",
    note:"풋살 전날 경량 하체 + 어깨 미니 세션. 스쿼트는 72%에서 RIR 3 고정 (무릎 아프면 스패니시 스쿼트 45초×5로 대체), 백 익스텐션이 후면 사슬 유지 담당. 어깨 3종은 가볍게.",
@@ -316,7 +316,7 @@ const PROGRAM = [
     {n:"45도 백 익스텐션 (원판)", w:10, s:3, r:10, rest:90, cue:"원판 가슴에 안고, 등이 아니라 엉덩이를 조여 올리기. 하강 2초 · 마지막 세트 최대 12회", prog:2.5, lastMin:12},
     {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"행잉 레그레이즈", w:0, s:3, r:12, rest:90, cue:"골반을 말아 올리기 — 다리만 들면 허벅지 운동. 힘들면 니레이즈로", prog:0},
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"},
     {n:"케이블 사이드 레터럴", w:0, s:4, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
     {n:"리어 델트 플라이", w:0, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", prog:2, lastMin:18},
     {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", prog:0}
@@ -341,7 +341,7 @@ const PROGRAM = [
     {n:"체스트 플라이 머신 (gym80)", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
     {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
     {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18},
-    {n:"앱 휠 롤아웃", w:0, s:3, r:10, rest:60, cue:"무릎 꿇고, 엉덩이 살짝 말기, 허리 버티는 거리까지만. 첫 2주는 2세트", prog:0}
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
    ]},
  { key:"fri", tab:"금", color:"var(--plate-white)", name:"당기기 B + 팔·복근", time:"약 70분",
    note:"원암 로우: 팔꿈치를 골반 쪽으로 — 광배 하부. 컬+익스텐션은 슈퍼세트 가능(5분 단축).",
@@ -353,7 +353,7 @@ const PROGRAM = [
     {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
     {n:"바벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"케이블 크런치", w:23, s:3, r:12, rest:90, cue:"엉덩이 고정, 흉곽을 골반 쪽으로. 팔로 당기지 말기 (50lb≈23kg 시작) · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
    ]}
 ];
 const CARDIO = [
@@ -397,7 +397,7 @@ function loadSession(dayKey){
   if(raw){ try{ return JSON.parse(raw) }catch(e){} }
   const day = PROGRAM.find(d=>d.key===dayKey);
   return { ex: day.ex.map((e,i)=>{
-    const cw = parseFloat(store.get(`cur:${dayKey}:${i}`));
+    const cw = parseFloat(store.get(e.sync ? `cur:sync:${e.sync}` : `cur:${dayKey}:${i}`));
     return { w: isNaN(cw) ? e.w : cw,
              sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
   }) };
@@ -519,7 +519,7 @@ function renderView(){
       }
       // 다음 세션 시작 중량 저장: 달성 시 +prog, 미달·유지 모드면 현재 중량 유지
       const nextW = (allHit && ex.prog>0) ? st.w + ex.prog : st.w;
-      store.set(`cur:${day.key}:${xi}`, String(nextW));
+      store.set(ex.sync ? `cur:sync:${ex.sync}` : `cur:${day.key}:${xi}`, String(nextW));
       if(ex.prog===0){
         progEl.classList.add('keep');
         progEl.textContent = '완료 — 횟수 종목, 폼 유지';
