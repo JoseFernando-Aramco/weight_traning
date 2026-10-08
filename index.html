@@ -178,6 +178,7 @@
   .tsheet.warn .ring .bar{stroke:var(--amber)} .tsheet.warn .ring .n{color:var(--amber)}
   .tsheet.zero .ring .bar{stroke:var(--done)} .tsheet.zero .ring .n{color:var(--done)}
   .tsheet .next{text-align:center; font-size:.85rem; color:var(--ink-dim); margin-top:6px; min-height:1.3em}
+  .ring .t .n .gonext{display:block; font-size:clamp(15px,4.6vw,19px); font-weight:800; color:var(--ink); margin-top:8px; letter-spacing:0; white-space:nowrap}
   .tsheet .next b{color:var(--ink)}
   .tsheet .btns{display:flex; gap:10px; margin-top:18px}
   .tsheet .btns button{touch-action:manipulation; flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line);
@@ -483,7 +484,7 @@ function renderView(){
             const nx = st.sets.findIndex(x=>!x.done);
             const wTxt = st.w>0 ? `${st.w}kg × ` : (ex.bw ? '맨몸 × ' : '');
             const target = (ex.lastMin && nx===st.sets.length-1) ? `${ex.r}~${ex.lastMin}회` : `${ex.r}회`;
-            startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`});
+            startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`, goText:`${wTxt}${target}`});
           } else {
             // 종목 완료 → 다음 종목까지 전환 휴식 (양쪽 종목의 휴식 처방 평균, 90초~3분)
             const nextEx = day.ex[xi+1];
@@ -492,7 +493,7 @@ function renderView(){
               let trans = Math.round((ex.rest + nextEx.rest)/2/15)*15;
               trans = Math.max(90, Math.min(180, trans));
               const nw = nst && nst.w>0 ? `${nst.w}kg × ` : (nextEx.bw ? '맨몸 × ' : '');
-              startTimer(trans, {ex:ex.n, done:si+1, next:`${nextEx.n} · ${nw}${nextEx.r}회${nextEx.s>1?` ×${nextEx.s}세트`:''}`});
+              startTimer(trans, {ex:ex.n, done:si+1, next:`${nextEx.n} · ${nw}${nextEx.r}회${nextEx.s>1?` ×${nextEx.s}세트`:''}`, goText:`${nw}${nextEx.r}회`});
               tExName.textContent = `${ex.n} 완료 — 종목 전환`;
             } else stopTimer(`${ex.n} 완료 — 오늘 세션 끝`);
           }
@@ -806,7 +807,7 @@ const tExName=document.getElementById('tExName'), tN=document.getElementById('tN
 const tMiniN=document.getElementById('tMiniN'), tNext=document.getElementById('tNext'), tBar=document.getElementById('tBar');
 const tPlus=document.getElementById('tPlus'), tSkip=document.getElementById('tSkip');
 const CIRC=703.7;
-let tInt=null, tEndAt=0, tTotal=0, tDone=false, tLeft=0;
+let tInt=null, tEndAt=0, tTotal=0, tDone=false, tLeft=0, tGoText='';
 let audioCtx=null;
 function beep(freq=880, dur=0.12, when=0){
   try{
@@ -842,8 +843,8 @@ function tick(){
     beep(880,0.15,0); beep(880,0.15,0.25); beep(1100,0.3,0.5);
     if(navigator.vibrate) navigator.vibrate([200,100,200]);
     tsheet.classList.remove('warn'); tsheet.classList.add('zero'); tBar.style.strokeDashoffset=String(CIRC);
-    tS.textContent='휴식 끝'; tN.textContent='GO'; tMiniN.textContent='GO';
-    setTimeout(hideTimer, 4000);
+    tS.textContent='휴식 끝 — 다음 세트'; tN.innerHTML=`GO<small class="gonext">${tGoText}</small>`; tMiniN.textContent='GO';
+    tSkip.textContent='닫기';
   }
 }
 function startTimer(sec, info){
@@ -852,6 +853,8 @@ function startTimer(sec, info){
   tExName.textContent = `${info.ex} · ${info.done}세트 완료`;
   tS.textContent = `${fmt(sec)} 중`;
   tNext.innerHTML = info.next ? `다음 <b>${info.next}</b>` : '';
+  tGoText = info.goText || '';
+  tSkip.textContent='건너뛰기';
   tsheet.classList.remove('warn','zero','mini','enter');
   void tsheet.offsetWidth;                         // 애니메이션 재트리거
   tsheet.classList.add('show','enter');
@@ -871,7 +874,7 @@ function stopTimer(msg){
   setTimeout(hideTimer, 2500);
 }
 function hideTimer(){
-  clearInterval(tInt); tEndAt=0; tDone=false;
+  clearInterval(tInt); tEndAt=0; tDone=false; tN.textContent='—'; tSkip.textContent='건너뛰기';
   if(tRaf){ cancelAnimationFrame(tRaf); tRaf=null }
   tsheet.classList.remove('show','warn','zero','mini');
 }
