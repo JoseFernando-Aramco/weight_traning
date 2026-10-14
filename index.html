@@ -57,6 +57,35 @@
   .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600; padding-bottom:6px}
   .brand .tag{color:var(--ink); font-style:italic; font-weight:700; font-size:.9rem; letter-spacing:-.01em; padding-bottom:11px; line-height:1; white-space:nowrap}
   .brand .tag b{color:#8bea1c; font-style:italic}
+  .golfbtn{margin-left:auto; min-width:var(--tap); min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); font-size:1.25rem; cursor:pointer; touch-action:manipulation; align-self:flex-end; margin-bottom:2px}
+  .golfbtn:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+
+  /* ── 샷 페이서 오버레이 ───────────────── */
+  .golf{position:fixed; inset:0; z-index:60; background:var(--bg); display:flex; flex-direction:column;
+    padding:calc(16px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)); touch-action:manipulation}
+  .golf[hidden]{display:none}
+  .golf-top{display:flex; align-items:center; justify-content:space-between}
+  .golf-title{font-weight:800; font-size:1.1rem}
+  .golf-x{min-width:var(--tap); min-height:var(--tap); border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:1rem; cursor:pointer}
+  .golf-cfg{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:4px 12px; margin:14px 0 0}
+  .golf-cfg.lock{opacity:.45; pointer-events:none}
+  .golf-interval{font-size:1.05rem}
+  .golf-main{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center}
+  .golf-count{font-size:1.4rem; font-weight:800; color:var(--ink-dim)}
+  .golf-count small{font-size:.9rem; font-weight:700; color:var(--ink-faint)}
+  .golf-big{font-size:clamp(96px,34vw,160px); font-weight:900; line-height:1; margin:10px 0 6px; transition:color .15s}
+  .golf-big.warn{color:var(--amber)}
+  .golf-big.go{color:#8bea1c}
+  .golf-sub{color:var(--ink-dim); font-size:.95rem; font-weight:700; min-height:1.4em}
+  .golf-elapsed{color:var(--ink-faint); font-size:.8rem; margin-top:10px}
+  .golf.warn{background:#2e2a1c} .golf.go{background:#1e2a1c}
+  .golf-btns{display:flex; gap:10px}
+  .golf-btns button{flex:1; min-height:56px; border-radius:14px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); font:inherit; font-weight:800; font-size:1rem; cursor:pointer}
+  .golf-btns button.primary{background:#8bea1c; color:#1a1c1f; border-color:#8bea1c}
+  @keyframes golfPop{0%{transform:scale(.7)} 50%{transform:scale(1.15)} 100%{transform:scale(1)}}
+  .golf-big.go{animation:golfPop .4s cubic-bezier(.34,1.45,.55,1)}
+  @media (prefers-reduced-motion:reduce){ .golf-big.go{animation:none} }
   .datebar{display:flex; align-items:center; gap:8px; margin-top:10px}
   .datebar input[type=date]{
     background:var(--panel); border:1px solid var(--line); color:var(--ink);
@@ -263,6 +292,7 @@
   <div class="brand">
     <h1><img src="icons/logo-wordmark.png?v=2" alt="쇠질로그" class="logo"></h1>
     <span class="tag">The Iron never <b>lies.</b></span>
+    <button class="golfbtn" id="golfBtn" type="button" aria-label="샷 페이서">⛳</button>
   </div>
   <div class="datebar">
     <input type="date" id="dateInput" aria-label="운동 날짜">
@@ -274,6 +304,28 @@
 </div>
 <main id="view"></main>
 
+<div class="golf" id="golf" role="dialog" aria-label="샷 페이서" hidden>
+  <div class="golf-top">
+    <div class="golf-title">샷 페이서</div>
+    <button class="golf-x" id="golfClose" type="button" aria-label="닫기">✕</button>
+  </div>
+  <div class="golf-cfg" id="golfCfg">
+    <div class="cfgrow"><label>시간당 샷 수</label><div class="stepper"><button data-k="per" data-d="-10">−</button><b class="num" id="gPer">100</b><button data-k="per" data-d="10">+</button></div></div>
+    <div class="cfgrow"><label>샷 간격</label><b class="num golf-interval" id="gInt">36초</b></div>
+    <div class="cfgrow"><label>총 샷 수 (0 = 무제한)</label><div class="stepper"><button data-k="total" data-d="-10">−</button><b class="num" id="gTotal">100</b><button data-k="total" data-d="10">+</button></div></div>
+  </div>
+  <div class="golf-main">
+    <div class="golf-count num"><span id="gShot">0</span><small id="gOf"> / 100</small></div>
+    <div class="golf-big num" id="gBig">—</div>
+    <div class="golf-sub" id="gSub">시작을 누르면 첫 샷까지 카운트다운</div>
+    <div class="golf-elapsed num" id="gElapsed"></div>
+  </div>
+  <div class="golf-btns">
+    <button id="gStart" class="primary" type="button">시작</button>
+    <button id="gPause" type="button" hidden>일시정지</button>
+    <button id="gReset" type="button" hidden>리셋</button>
+  </div>
+</div>
 <div class="tsheet" id="tsheet" role="dialog" aria-label="휴식 타이머">
   <div class="grab" id="tGrab">
     <div class="handle"></div>
@@ -944,6 +996,60 @@ function weekInfo(){
 const weekChip = document.getElementById('weekChip');
 function renderWeek(){ weekChip.textContent = weekInfo() }
 dateInput.addEventListener('change', renderWeek);
+
+/* ══════════ 골프 샷 페이서 ══════════ */
+(function(){
+  const golf=document.getElementById('golf'), btn=document.getElementById('golfBtn'), xBtn=document.getElementById('golfClose');
+  const cfgEl=document.getElementById('golfCfg'), gPer=document.getElementById('gPer'), gInt=document.getElementById('gInt'), gTotal=document.getElementById('gTotal');
+  const gShot=document.getElementById('gShot'), gOf=document.getElementById('gOf'), gBig=document.getElementById('gBig'), gSub=document.getElementById('gSub'), gEl=document.getElementById('gElapsed');
+  const bStart=document.getElementById('gStart'), bPause=document.getElementById('gPause'), bReset=document.getElementById('gReset');
+  const KEY='cfg:golf';
+  let cfg={per:100,total:100}; try{ Object.assign(cfg, JSON.parse(store.get(KEY)||'{}')) }catch(e){}
+  let shots=0, nextAt=0, startedAt=0, pausedLeft=0, running=false, raf=null, lastSec=null, interval=36;
+  const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  let ac=null;
+  function beep(f,d,w=0){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); const o=ac.createOscillator(),g=ac.createGain(); o.frequency.value=f; o.connect(g); g.connect(ac.destination); const t=ac.currentTime+w; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.3,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.start(t); o.stop(t+d+.02) }catch(e){} }
+  function renderCfg(){ interval=Math.round(3600/cfg.per); gPer.textContent=cfg.per; gInt.textContent=`${interval}초`; gTotal.textContent=cfg.total; gOf.textContent=cfg.total? ` / ${cfg.total}` : ''; }
+  cfgEl.querySelectorAll('.stepper button').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k, d=parseInt(b.dataset.d,10);
+    if(k==='per') cfg.per=Math.max(30,Math.min(300,cfg.per+d));
+    if(k==='total') cfg.total=Math.max(0,Math.min(500,cfg.total+d));
+    store.set(KEY,JSON.stringify(cfg)); renderCfg();
+  });
+  function setBig(txt,cls){ gBig.textContent=txt; gBig.className='golf-big num'+(cls?' '+cls:''); golf.classList.remove('warn','go'); if(cls) golf.classList.add(cls); }
+  function tick(){
+    if(!running) return;
+    const now=Date.now(), left=(nextAt-now)/1000, sec=Math.ceil(left);
+    if(left<=0){
+      shots++; gShot.textContent=shots;
+      setBig('샷','go'); gSub.textContent=`${shots}번째 — 치세요`;
+      beep(1320,.5); if(navigator.vibrate) navigator.vibrate(300);
+      if(cfg.total && shots>=cfg.total){ running=false; gSub.textContent=`${cfg.total}개 완료 — 수고하셨습니다`; bPause.hidden=true; bStart.hidden=true; bReset.hidden=false; gEl.textContent=`총 ${fmt(Math.round((now-startedAt)/1000))}`; return }
+      nextAt=now+interval*1000; lastSec=null;
+      setTimeout(()=>{ if(running) tick() }, 1200); return;
+    }
+    if(sec!==lastSec){
+      lastSec=sec;
+      if(sec<=3){ setBig(String(sec),'warn'); gSub.textContent='준비'; beep(880,.08) }
+      else { setBig(String(sec),''); gSub.textContent=`다음 샷까지`; }
+    }
+    gEl.textContent=`경과 ${fmt(Math.round((now-startedAt)/1000))}`;
+    raf=requestAnimationFrame(tick);
+  }
+  bStart.onclick=()=>{
+    if(!running && pausedLeft>0){ nextAt=Date.now()+pausedLeft; pausedLeft=0; }
+    else { shots=0; gShot.textContent='0'; startedAt=Date.now(); nextAt=Date.now()+5000; }   // 첫 샷 5초 후
+    running=true; lastSec=null; cfgEl.classList.add('lock');
+    bStart.hidden=true; bPause.hidden=false; bReset.hidden=false; beep(660,.08);
+    if(raf) cancelAnimationFrame(raf); tick();
+  };
+  bPause.onclick=()=>{ running=false; pausedLeft=Math.max(0,nextAt-Date.now()); if(raf) cancelAnimationFrame(raf); bPause.hidden=true; bStart.hidden=false; bStart.textContent='계속'; gSub.textContent='일시정지'; };
+  bReset.onclick=()=>{ running=false; pausedLeft=0; shots=0; if(raf) cancelAnimationFrame(raf); gShot.textContent='0'; setBig('—',''); gSub.textContent='시작을 누르면 첫 샷까지 카운트다운'; gEl.textContent=''; cfgEl.classList.remove('lock'); bStart.hidden=false; bStart.textContent='시작'; bPause.hidden=true; bReset.hidden=true; };
+  btn.onclick=()=>{ golf.hidden=false; renderCfg(); };
+  xBtn.onclick=()=>{ if(running && !confirm('페이서가 실행 중입니다. 닫을까요?')) return; bReset.onclick(); golf.hidden=true; };
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && running){ lastSec=null; if(raf) cancelAnimationFrame(raf); tick() } });
+  renderCfg();
+})();
 
 /* ══════════ 상단바 스크롤 상태 ══════════ */
 const topbar=document.getElementById('topbar');
