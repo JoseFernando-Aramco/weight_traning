@@ -95,7 +95,7 @@
     border:1px solid var(--line); padding:8px 12px; border-radius:999px; font-weight:700}
 
   /* ── 요일 탭: 원판 컬러 ───────────── */
-  nav{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; padding:12px 12px; max-width:640px; margin:0 auto}
+  nav{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:12px 16px; max-width:640px; margin:0 auto}
   nav button{
     min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
     background:var(--panel); color:var(--ink-dim); font:inherit; font-weight:800; font-size:.8rem; padding:0 2px;
@@ -361,8 +361,42 @@ const PROGRAM = [
     {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
    ]},
- { key:"tue", tab:"화", color:"var(--plate-blue)", name:"하체 유지 + 어깨", time:"약 55분",
-   note:"풋살 전날 경량 하체 + 어깨 미니 세션. 스쿼트는 72%에서 RIR 3 고정 (무릎 아프면 스패니시 스쿼트 45초×5로 대체), 데드는 매주 2세트 145. 어깨 3종은 가볍게.",
+ { key:"wed", tab:"화", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화 + 이두", time:"약 65분",
+   note:"등 메인 데이 1 — 수직 당기기·광배 집중, 너비 담당. 끝에 이두 무겁게(바벨컬·프리처). 목요일 시티드로우와 48시간 간격. 큐: 손은 고리, 팔꿈치로 당긴다.",
+   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20~30초 → 밴드 랫풀 15회<br><b>T바:</b> 20×10 → 40×6 → 본세트",
+   ex:[
+    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg · 마지막 세트 최대 10회", prog:5, bw:true, lastMin:10},
+    {n:"T바로우 (넓은 오버핸드)", w:60, s:4, r:8, rest:150, cue:"팔꿈치 45~60도 벌려 당기기, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입 · 마지막 세트 최대 10회", prog:5, lastMin:10},
+    {n:"랫풀다운 (뉴트럴그립)", w:0, s:2, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", prog:5, lastMin:12},
+    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"바벨컬 (EZ바)", w:30, s:3, r:8, rest:120, cue:"이두 메인 — 무겁게, 반동 없이. 팔꿈치 옆구리 고정, 하강 2초 · 마지막 세트 최대 10회", prog:2.5, lastMin:10},
+    {n:"프리처컬", w:0, s:3, r:10, rest:90, cue:"수축 1초 조이기, 바닥에서 팔 완전히 펴지 않기(장력 유지) · 마지막 세트 최대 12회", prog:2.5, lastMin:12}
+   ]},
+ { key:"thu", tab:"수", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨 + 복근", time:"약 65분 + 풋살 20–22시",
+   note:"풋살 전 상체 밀기 — 하체 영향 0. 17시 전 종료 → 18시 탄수화물 식사 → 풋살. 플라이는 큰 호를 그리기.",
+   warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
+   ex:[
+    {n:"인클라인 바벨프레스", w:80, s:4, r:8, rest:150, cue:"전 세트 8회 달성 시 +2.5kg", prog:2.5},
+    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
+    {n:"체스트 플라이 머신 (gym80)", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
+    {n:"사이드 레터럴 (케이블)", w:0, s:4, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18},
+    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
+   ]},
+ { key:"fri", tab:"목", color:"var(--plate-white)", name:"당기기 B — 시티드로우 메인 · 후면 · 팔", time:"약 65분",
+   note:"등 메인 데이 2 — 시티드로우 무겁게, 두께 담당. 풋살 다음날이지만 앉아서 하는 종목이라 다리 무관. 전신 컨디션 무거우면 시티드로우 5% 감량. 컬·익스텐션은 슈퍼세트 가능.",
+   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20초<br><b>시티드로우:</b> 스택 최하단×10 → 40kg×6 → 본세트",
+   ex:[
+    {n:"시티드 케이블로우 (V바)", w:59, s:4, r:8, rest:150, cue:"세션 메인 — 무겁게. 상체 고정, 팔꿈치 옆구리 스치며 배꼽까지, 견갑 1초, 하강 2초. 마지막 세트 10회 후 여유 있으면 드랍 +8 · 마지막 세트 최대 10회", prog:5, lastMin:10},
+    {n:"원암 덤벨로우", w:0, s:3, r:10, rest:120, cue:"좌우 보정용. 각 팔 10회, 팔꿈치를 골반 쪽으로 · 마지막 세트 최대 12회", prog:2, lastMin:12},
+    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게, 팔꿈치가 손목보다 높게 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
+    {n:"리어 델트 플라이", w:0, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", prog:2, lastMin:18},
+    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14},
+    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14},
+    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1. 컬과 슈퍼세트 가능 · 마지막 세트 최대 14회", prog:2.5, lastMin:14}
+   ]},
+ { key:"tue", tab:"금", color:"var(--plate-blue)", name:"하체 유지 + 어깨 측면 + 스프린트", time:"약 60분",
+   note:"풋살까지 5일 — 하체 피로가 수요일에 끼어들지 않는 자리. 스쿼트 72% RIR 3 (무릎 아프면 스패니시 스쿼트 45초×5), 데드 2세트 145. 레터럴·외회전 가볍게(리어델트는 화요일로). 마지막에 가속 달리기 4본.",
    warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 110×2<br><b>데드:</b> 60×5 → 100×3 → 125×1 (벨트)",
    ex:[
     {n:"백스쿼트", w:125, s:3, r:5, rest:180, cue:"72%, RIR 3에서 정지. 증량 없음 — 3주 이상 가뿐하면 +2.5 수동 조정", prog:0},
@@ -370,43 +404,9 @@ const PROGRAM = [
     {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"},
-    {n:"케이블 사이드 레터럴", w:0, s:4, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
-    {n:"리어 델트 플라이", w:0, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", prog:2, lastMin:18},
-    {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", prog:0}
-   ]},
- { key:"wed", tab:"수", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화", time:"약 60분 + 풋살 20–22시",
-   note:"17시 전 종료 → 18시 탄수화물 식사 → 풋살. 바쁜 주는 1·2·3번만(40분). 큐: 손은 고리, 팔꿈치로 당긴다.",
-   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20~30초 → 밴드 랫풀 15회",
-   ex:[
-    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg · 마지막 세트 최대 10회", prog:5, bw:true, lastMin:10},
-    {n:"T바로우 (넓은 오버핸드)", w:60, s:4, r:8, rest:150, cue:"팔꿈치 45~60도 벌려 당기기, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입 · 마지막 세트 최대 10회", prog:5, lastMin:10},
-    {n:"랫풀다운 (뉴트럴그립)", w:0, s:2, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", prog:5, lastMin:12},
-    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
-    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14},
-    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2, lastMin:14}
-   ]},
- { key:"thu", tab:"목", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨", time:"약 70분",
-   note:"풋살 다음날 — 유난히 무거우면 인클라인 5% 감량. 플라이는 큰 호를 그리기.",
-   warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
-   ex:[
-    {n:"인클라인 바벨프레스", w:80, s:4, r:8, rest:150, cue:"전 세트 8회 달성 시 +2.5kg", prog:2.5},
-    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"체스트 플라이 머신 (gym80)", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
-    {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
-    {n:"사이드 레터럴 (케이블)", w:0, s:3, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", prog:1, lastMin:18},
-    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
-   ]},
- { key:"fri", tab:"금", color:"var(--plate-white)", name:"당기기 B + 팔·복근", time:"약 70분",
-   note:"원암 로우: 팔꿈치를 골반 쪽으로 — 광배 하부. 컬+익스텐션은 슈퍼세트 가능(5분 단축).",
-   warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20초",
-   ex:[
-    {n:"원암 덤벨로우", w:0, s:4, r:10, rest:120, cue:"각 팔 10회, RIR 2 · 마지막 세트 최대 12회", prog:2, lastMin:12},
-    {n:"랫풀다운 (와이드)", w:0, s:4, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", prog:5, lastMin:12},
-    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"RIR 2 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
-    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
-    {n:"바벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", prog:2.5, lastMin:14},
-    {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"}
+    {n:"케이블 사이드 레터럴", w:0, s:5, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
+    {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", prog:0},
+    {n:"가속 달리기 30m", w:0, s:4, r:1, rest:60, cue:"60→75→85→90% 순서로 1본씩. 바닥 공간 없으면 러닝머신 13·14·14·15km/h 15초. 횟수 칸은 1로 체크", prog:0}
    ]}
 ];
 const CARDIO = [
@@ -428,13 +428,13 @@ const skey = (date, day) => `log:${date}:${day}`;
 /* ══════════ 상태 ══════════ */
 const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10) };
 let curDate = todayISO();
-let curTab = (()=>{ const dow = new Date().getDay(); return ["sun","mon","tue","wed","thu","fri","sat"][dow] || "mon" })();
+let curTab = (()=>{ const dow = new Date().getDay(); return [null,"mon","wed","thu","fri","tue",null][dow] || "mon" })();
 
 /* ══════════ 탭 ══════════ */
 const tabsEl = document.getElementById('tabs');
 function renderTabs(){
   tabsEl.innerHTML = '';
-  [...PROGRAM, ...CARDIO, HIST_TAB].forEach(d=>{
+  [...PROGRAM, HIST_TAB].forEach(d=>{
     const b = document.createElement('button');
     b.style.setProperty('--c', d.color);
     b.className = curTab===d.key ? 'on' : '';
@@ -463,8 +463,6 @@ function saveSession(dayKey, data){
 const view = document.getElementById('view');
 function renderView(){
   if(curTab==='hist'){ renderHistory(); return }
-  if(curTab==='sat'){ renderSprint(); return }
-  if(curTab==='sun'){ renderZone2(); return }
   const day = PROGRAM.find(d=>d.key===curTab);
   const data = loadSession(day.key);
   view.innerHTML = '';
@@ -595,10 +593,10 @@ function renderView(){
   rules.innerHTML = `<h3>운영 규칙</h3>
     <b>메인 리프트</b>(벤치·인클라인): 전 세트 목표 횟수 달성 → 다음 주 +2.5kg<br>
     <b>보조 종목</b>: 마지막 세트를 표시된 상한까지 (상한 되면 멈춤). 상한 달성 시 자동 증량, 미달 시 유지<br>
-    <b>하체</b>: 유지 모드 — 스쿼트 125 / 데드 145 고정(RIR 3). 풋살 전날이라 한계 도전 없음<br>
+    <b>하체(금)</b>: 유지 모드 — 스쿼트 125 / 데드 145 고정(RIR 3). 풋살까지 5일<br>
 
     <b>디로드</b>: 5주 훈련 + 1주 (중량 60%, 세트 절반) — 상단 주차 표시 참고<br>
-    영양: 평일 3,000~3,050kcal · 수 3,300kcal · 단백질 145~165g · 수면 7시간+`;
+    영양: 평일 3,200kcal · 수 3,800kcal · 단백질 160g · 수면 7시간+`;
   view.appendChild(rules);
 }
 
