@@ -406,7 +406,7 @@ const PROGRAM = [
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", prog:2.5, lastMin:14, sync:"situp"},
     {n:"케이블 사이드 레터럴", w:0, s:5, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", prog:1, lastMin:18},
     {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", prog:0},
-    {n:"가속 달리기 30m", w:0, s:4, r:1, rest:60, cue:"60→75→85→90% 순서로 1본씩. 바닥 공간 없으면 러닝머신 13·14·14·15km/h 15초. 횟수 칸은 1로 체크", prog:0}
+    {n:"가속 달리기 (러닝머신)", w:13, s:4, r:1, rest:60, cue:"각 15초, 속도 전환 중엔 손잡이 잡기. 60→75→85→90% 체감. 바닥 공간 있으면 30m 가속 달리기로 대체", prog:0, unit:"km/h", perSet:[13,14,14,15], noProg:true}
    ]}
 ];
 const CARDIO = [
@@ -445,12 +445,33 @@ function renderTabs(){
 }
 
 /* ══════════ 세션 데이터 로드/저장 ══════════ */
+const curKey = e => e.sync ? `cur:sync:${e.sync}` : `cur:n:${e.n}`;
+/* 1회 이관: 구버전 요일:번호 키 → 종목 이름 키 (2026-11-01 재배치 이전 순서 기준) */
+(function migrateCur(){
+  if(store.get('migrated:v2')) return;
+  const MAP = {
+    mon:["플랫 벤치프레스","인클라인 덤벨프레스","시티드 딥 (해머)","사이드 레터럴 레이즈","케이블 푸시다운",null],
+    tue:["백스쿼트","컨벤셔널 데드리프트","레그컬","스탠딩 카프레이즈",null,"케이블 사이드 레터럴","리어 델트 플라이","케이블 외회전"],
+    wed:["와이드그립 풀업","T바로우 (넓은 오버핸드)","랫풀다운 (뉴트럴그립)","스트레이트암 풀다운","인클라인 덤벨컬","해머컬"],
+    thu:["인클라인 바벨프레스","디클라인 케이블 플라이","체스트 플라이 머신 (gym80)","덤벨 숄더프레스","사이드 레터럴 (케이블)",null],
+    fri:["원암 덤벨로우",null,null,"페이스풀","바벨컬 (EZ바)","오버헤드 익스텐션",null]
+  };
+  Object.entries(MAP).forEach(([day,names])=>{
+    names.forEach((name,i)=>{
+      const v=store.get(`cur:${day}:${i}`);
+      if(v!==null && name && store.get(`cur:n:${name}`)===null) store.set(`cur:n:${name}`, v);
+      if(v!==null) store.del(`cur:${day}:${i}`);
+    });
+  });
+  store.set('migrated:v2','1');
+})();
 function loadSession(dayKey){
   const raw = store.get(skey(curDate, dayKey));
   if(raw){ try{ return JSON.parse(raw) }catch(e){} }
   const day = PROGRAM.find(d=>d.key===dayKey);
   return { ex: day.ex.map((e,i)=>{
-    const cw = parseFloat(store.get(e.sync ? `cur:sync:${e.sync}` : `cur:${dayKey}:${i}`));
+    if(e.noW) return { w:0, sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
+    const cw = parseFloat(store.get(curKey(e)));
     return { w: isNaN(cw) ? e.w : cw,
              sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
   }) };
@@ -503,8 +524,8 @@ function renderView(){
       row.className = 'setrow' + (set.done?' done':'');
       row.innerHTML = `
         <span class="idx num">${si+1}</span>
-        <div class="field"><input type="number" inputmode="decimal" step="0.5" min="0"
-          aria-label="${ex.n} ${si+1}세트 중량" value="${si===0? st.w : st.w}" data-role="w"><span class="unit">kg</span></div>
+        <div class="field" ${ex.noW?'style="visibility:hidden"':''}><input type="number" inputmode="decimal" step="0.5" min="0"
+          aria-label="${ex.n} ${si+1}세트 ${ex.unit||'중량'}" value="${ex.noW?'':(ex.perSet ? (set.w ?? ex.perSet[si] ?? st.w) : st.w)}" data-role="w" ${ex.noW?'disabled':''}><span class="unit">${ex.unit||'kg'}</span></div>
         <div class="field"><input type="number" inputmode="numeric" step="1" min="0"
           aria-label="${ex.n} ${si+1}세트 횟수" placeholder="${ex.lastMin && si===st.sets.length-1 ? ex.r+'~'+ex.lastMin : ex.r}" value="${set.r??''}" data-role="r"><span class="unit">회</span></div>
         <button class="chk ${set.done?'on':''}" aria-label="${si+1}세트 완료">${set.done?'✓':'○'}</button>`;
@@ -515,6 +536,7 @@ function renderView(){
 
       wIn.addEventListener('change', ()=>{
         const v = parseFloat(wIn.value)||0;
+        if(ex.perSet){ set.w = v; saveSession(day.key, data); return; }   // 세트별 개별값 (속도 등)
         st.w = v;
         // 같은 종목 모든 세트 중량 동기화
         card.querySelectorAll('[data-role=w]').forEach(i=>i.value=v||'');
@@ -532,7 +554,7 @@ function renderView(){
           const isLastSet = st.sets.every(s=>s.done);
           if(!isLastSet){
             const nx = st.sets.findIndex(x=>!x.done);
-            const wTxt = st.w>0 ? `${st.w}kg × ` : (ex.bw ? '맨몸 × ' : '');
+            const wTxt = ex.perSet ? `${st.sets[nx].w ?? ex.perSet[nx]}${ex.unit||'kg'} × ` : (st.w>0 ? `${st.w}kg × ` : (ex.bw ? '맨몸 × ' : ''));
             const target = (ex.lastMin && nx===st.sets.length-1) ? `${ex.r}~${ex.lastMin}회` : `${ex.r}회`;
             startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`, goText:`${wTxt}${target}`});
           } else {
@@ -570,10 +592,10 @@ function renderView(){
       }
       // 다음 세션 시작 중량 저장: 달성 시 +prog, 미달·유지 모드면 현재 중량 유지
       const nextW = (allHit && ex.prog>0) ? st.w + ex.prog : st.w;
-      store.set(ex.sync ? `cur:sync:${ex.sync}` : `cur:${day.key}:${xi}`, String(nextW));
+      if(!ex.noW && !ex.noProg) store.set(curKey(ex), String(nextW));
       if(ex.prog===0){
         progEl.classList.add('keep');
-        progEl.textContent = '완료 — 횟수 종목, 폼 유지';
+        progEl.textContent = ex.noProg ? '완료 — 4본 수행' : '완료 — 횟수 종목, 폼 유지';
       } else if(allHit){
         progEl.classList.add('hit');
         progEl.textContent = `전 세트 목표 달성 — 다음 주 +${ex.prog}kg (${(st.w+ex.prog).toFixed(1).replace(/\.0$/,'')}kg)`;
@@ -634,11 +656,11 @@ function renderHistory(){
       const lastOk  = !ex.lastMin || ((st.sets[st.sets.length-1].r??0) >= ex.lastMin);
       const allHit  = allDone && st.sets.every(s=> (s.r??0) >= ex.r ) && lastOk;
       const reps = st.sets.map(s=> s.done ? (s.r??0) : '–').join('/');
-      const wTxt = st.w>0 ? `${st.w}kg` : '맨몸';
+      const wTxt = ex.noW ? '' : ex.perSet ? st.sets.map(x=> x.w ?? '').filter(x=>x!=='').join('·')+(ex.unit||'kg') : (st.w>0 ? `${st.w}kg` : '맨몸');
       let badge;
       if(!allDone){
         badge = `<span class="fb gray">미완료</span>`;
-      } else if(ex.prog>0 && !ex.bw && !(st.w>0)){
+      } else if(ex.prog>0 && !ex.bw && !ex.noW && !(st.w>0)){
         judged++; hitCnt += allHit?1:0;
         badge = `<span class="fb gray">중량 미기록</span>`;
       } else if(ex.prog===0){
@@ -651,7 +673,7 @@ function renderHistory(){
         judged++;
         badge = `<span class="fb keep">${wTxt} 유지</span>`;
       }
-      rows.push(`<div class="hrow"><span class="hname">${ex.n}</span><span class="hres num">${wTxt} · ${reps}</span>${badge}</div>`);
+      rows.push(`<div class="hrow"><span class="hname">${ex.n}</span><span class="hres num">${wTxt?wTxt+' · ':''}${reps}</span>${badge}</div>`);
     });
     if(done===0) return;
     shown++;
@@ -680,7 +702,7 @@ function renderHistory(){
   view.appendChild(tools);
   document.getElementById('expBtn').onclick = ()=>{
     const dump = {};
-    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')).forEach(k=>dump[k]=store.get(k));
+    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')).forEach(k=>dump[k]=store.get(k));
     const blob = new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `쇠질로그_백업_${todayISO()}.json`; a.click();
@@ -693,7 +715,7 @@ function renderHistory(){
       const rd = new FileReader();
       rd.onload = ()=>{ try{
         const dump = JSON.parse(rd.result);
-        Object.entries(dump).forEach(([k,v])=>{ if(k.startsWith('log:')||k.startsWith('cur:')) store.set(k,v) });
+        Object.entries(dump).forEach(([k,v])=>{ if(k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')) store.set(k,v) });
         alert('기록과 이월 중량을 불러왔습니다');
         renderHistory();
       }catch(e){ alert('파일 형식을 읽을 수 없습니다') } };
