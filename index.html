@@ -370,7 +370,7 @@ const PROGRAM = [
     {n:"랫풀다운 (뉴트럴그립)", w:0, s:2, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", prog:5, lastMin:12},
     {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", prog:2.5, lastMin:18},
     {n:"바벨컬 (EZ바)", w:30, s:3, r:8, rest:120, cue:"이두 메인 — 무겁게, 반동 없이. 팔꿈치 옆구리 고정, 하강 2초 · 마지막 세트 최대 10회", prog:2.5, lastMin:10},
-    {n:"프리처컬", w:0, s:3, r:10, rest:90, cue:"수축 1초 조이기, 바닥에서 팔 완전히 펴지 않기(장력 유지) · 마지막 세트 최대 12회", prog:2.5, lastMin:12}
+    {n:"프리처컬 (머신)", w:0, s:3, r:10, rest:90, cue:"겨드랑이를 패드 상단에, 팔꿈치는 회전축에. 올림 1초·꼭대기 1초·내림 2초, 바닥에서 완전히 펴지 않기 · 마지막 세트 최대 12회", prog:2.5, lastMin:12}
    ]},
  { key:"thu", tab:"수", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨 + 복근", time:"약 65분 + 풋살 20–22시",
    note:"풋살 전 상체 밀기 — 하체 영향 0. 17시 전 종료 → 18시 탄수화물 식사 → 풋살. 플라이는 큰 호를 그리기.",
@@ -929,7 +929,7 @@ function startTimer(sec, info){
   tSkip.textContent='건너뛰기';
   tsheet.classList.remove('warn','zero','mini','enter');
   void tsheet.offsetWidth;                         // 애니메이션 재트리거
-  tsheet.classList.add('show','enter');
+  tsheet.classList.add('show','enter'); pinSheet();
   tStartAt = Date.now(); tBar.style.strokeDashoffset=String(CIRC);
   if(tRaf) cancelAnimationFrame(tRaf); tRaf = requestAnimationFrame(drawRing);
   tick(); beep(660,0.08);
@@ -952,7 +952,7 @@ function hideTimer(){
 }
 tSkip.onclick = hideTimer;
 tPlus.onclick = ()=>{ if(!tEndAt||tDone) return; tEndAt += 30000; tTotal += 30; tS.textContent=`${fmt(tTotal)} 중`; delete tsheet.dataset.warned; tick() };
-tGrab.onclick = ()=>{ if(tsheet.classList.contains('show') && !swiped) tsheet.classList.toggle('mini') };
+tGrab.onclick = ()=>{ if(tsheet.classList.contains('show') && !swiped){ tsheet.classList.toggle('mini'); pinSheet(); } };
 
 /* 스와이프: 아래로 끌면 접히고, 접힌 상태에서 위로 끌면 펼쳐짐 */
 let sy=0, dy=0, dragging=false, swiped=false;
@@ -978,10 +978,30 @@ function endDrag(){
   const mini = tsheet.classList.contains('mini');
   if(!mini && dy>60) tsheet.classList.add('mini');
   else if(mini && dy<-40) tsheet.classList.remove('mini');
+  pinSheet();
   setTimeout(()=>{ swiped=false }, 50);          // 스와이프 직후 click 토글 방지
 }
 tsheet.addEventListener('touchend', endDrag);
 tsheet.addEventListener('touchcancel', endDrag);
+
+/* iOS: 키보드가 떴다 사라지면 fixed 요소가 제자리를 잃는 문제 보정
+   visualViewport 기준으로 bottom 오프셋을 직접 계산해 항상 화면 하단에 붙임 */
+function pinSheet(){
+  const vv = window.visualViewport;
+  if(!vv){ tsheet.style.bottom=''; return }
+  const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);   // 키보드 등으로 가려진 높이
+  const base = tsheet.classList.contains('mini') ? 14 : 0;
+  tsheet.style.bottom = (kb + base) + 'px';
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', pinSheet);
+  window.visualViewport.addEventListener('scroll', pinSheet);
+}
+window.addEventListener('orientationchange', ()=>setTimeout(pinSheet,300));
+// 입력칸 포커스 해제(키보드 닫힘) 직후에도 재고정
+document.addEventListener('focusout', ()=>{ setTimeout(pinSheet,50); setTimeout(pinSheet,350) });
+document.addEventListener('focusin', ()=>setTimeout(pinSheet,50));
+pinSheet();
 // 백그라운드 복귀 시 즉시 재계산 (화면 꺼짐/앱 전환 후에도 잔여시간 정확)
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible' && tEndAt && !tDone) tick();
