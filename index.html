@@ -91,7 +91,10 @@
     background:var(--panel); border:1px solid var(--line); color:var(--ink);
     border-radius:10px; padding:10px 12px; font:inherit; min-height:var(--tap);
   }
-  .weekchip{margin-left:auto; font-size:.75rem; color:var(--ink-dim); background:var(--panel);
+  .weekchip{margin-left:auto; font-size:.75rem; color:var(--ink-dim); background:var(--panel); font:inherit; font-size:.75rem; cursor:pointer; min-height:var(--tap); touch-action:manipulation}
+  .weekchip.deload{background:rgba(255,176,32,.14); color:var(--amber); border-color:var(--amber); font-weight:800}
+  .deload-banner{margin:10px 0 0; padding:10px 14px; border-radius:12px; background:rgba(255,176,32,.12); border:1px solid rgba(255,176,32,.4); color:var(--amber); font-size:.82rem; font-weight:700; line-height:1.5}
+  .weekchip-x{margin-left:auto; font-size:.75rem; color:var(--ink-dim); background:var(--panel);
     border:1px solid var(--line); padding:8px 12px; border-radius:999px; font-weight:700}
 
   /* ── 요일 탭: 원판 컬러 ───────────── */
@@ -202,12 +205,12 @@
   .ring .track{stroke:var(--line)}
   .ring .bar{stroke:var(--done); stroke-linecap:round; transition:stroke .3s}
   .ring .t{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
-  .ring .t .n{font-size:clamp(48px,16vw,64px); font-weight:900; line-height:1; letter-spacing:.01em}
+  .ring .t .n{font-size:clamp(48px,16vw,64px); font-weight:900; line-height:1; letter-spacing:.01em; text-align:center; width:100%; padding:0 14%; box-sizing:border-box}
   .ring .t .s{font-size:.75rem; color:var(--ink-dim); margin-top:8px; font-weight:700}
   .tsheet.warn .ring .bar{stroke:var(--amber)} .tsheet.warn .ring .n{color:var(--amber)}
   .tsheet.zero .ring .bar{stroke:var(--done)} .tsheet.zero .ring .n{color:var(--done)}
   .tsheet .next{text-align:center; font-size:.85rem; color:var(--ink-dim); margin-top:6px; min-height:1.3em}
-  .ring .t .n .gonext{display:block; font-size:clamp(15px,4.6vw,19px); font-weight:800; color:var(--ink); margin-top:8px; letter-spacing:0; white-space:nowrap}
+  .ring .t .n .gonext{display:block; font-size:clamp(13px,4.2vw,18px); font-weight:800; color:var(--ink); margin-top:8px; letter-spacing:0; white-space:nowrap; text-align:center; max-width:100%; overflow:hidden; text-overflow:ellipsis}
   .tsheet .next b{color:var(--ink)}
   .tsheet .btns{display:flex; gap:10px; margin-top:18px}
   .tsheet .btns button{touch-action:manipulation; flex:1; min-height:52px; border-radius:14px; border:1px solid var(--line);
@@ -296,7 +299,7 @@
   </div>
   <div class="datebar">
     <input type="date" id="dateInput" aria-label="운동 날짜">
-    <span class="weekchip num" id="weekChip"></span>
+    <button class="weekchip num" id="weekChip" type="button" aria-pressed="false" title="탭하면 디로드 모드 전환"></button>
   </div>
 </header>
 
@@ -472,11 +475,28 @@ function loadSession(dayKey){
   return { ex: day.ex.map((e,i)=>{
     if(e.noW) return { w:0, sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
     const cw = parseFloat(store.get(curKey(e)));
-    return { w: isNaN(cw) ? e.w : cw,
-             sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
+    let w = isNaN(cw) ? e.w : cw, sets = e.s;
+    if(DELOAD.on && !e.perSet){
+      if(!e.bw && w>0) w = deloadW(w);
+      sets = Math.max(1, Math.ceil(e.s/2));
+    }
+    return { w, sets: Array.from({length:sets},()=>({r:null,done:false})), deload: DELOAD.on || undefined };
   }) };
 }
+/* ── 디로드 모드: 이월 중량의 60%를 2.5kg 단위로 반올림, 세트 절반. 이월 중량은 건드리지 않음 ── */
+const DELOAD = { on: store.get('deload:on')==='1' };
+function deloadW(w){ return Math.max(2.5, Math.round(w*0.6/2.5)*2.5) }
+function setDeload(on){
+  DELOAD.on = !!on; store.set('deload:on', on?'1':'0');
+  // 오늘 날짜의 아직 손대지 않은 세션 캐시는 버려서 새 중량으로 다시 만든다 (체크된 세트가 있으면 보존)
+  PROGRAM.forEach(d=>{
+    const raw=store.get(skey(curDate,d.key)); if(!raw) return;
+    try{ const data=JSON.parse(raw); const touched=data.ex.some(x=>x.sets.some(st=>st.done)); if(!touched) store.del(skey(curDate,d.key)); }catch(e){}
+  });
+  renderWeek(); renderView();
+}
 function saveSession(dayKey, data){
+  if(DELOAD.on) data.deload=true;
   store.set(skey(curDate, dayKey), JSON.stringify(data));
 }
 
@@ -497,6 +517,11 @@ function renderView(){
     <p class="daynote">${day.note}</p>
     <details class="warm"><summary>워밍업</summary><div class="body">${day.warm}</div></details>`;
   view.appendChild(head);
+  if(DELOAD.on){
+    const b=document.createElement('div'); b.className='deload-banner';
+    b.textContent='디로드 모드 — 표시 중량은 이월 중량의 60%(2.5kg 반올림), 세트 절반. RIR 4 이상으로 가볍게. 끝나면 상단 칩을 눌러 끄세요.';
+    view.insertBefore(b, head.nextSibling);
+  }
 
   day.ex.forEach((ex, xi)=>{
     const st = data.ex[xi];
@@ -590,6 +615,9 @@ function renderView(){
         progEl.textContent = allHit ? '마지막 세트 상한 달성 — 중량을 적어두면 다음 주부터 자동 증량' : '중량을 적어두면 다음 주부터 자동 판정';
         return;
       }
+      if(st.deload || data.deload){
+        progEl.classList.add('keep'); progEl.textContent = '디로드 세션 완료 — 증량 판정 없음, 이월 중량 유지'; return;
+      }
       // 다음 세션 시작 중량 저장: 달성 시 +prog, 미달·유지 모드면 현재 중량 유지
       const nextW = (allHit && ex.prog>0) ? st.w + ex.prog : st.w;
       if(!ex.noW && !ex.noProg) store.set(curKey(ex), String(nextW));
@@ -678,7 +706,7 @@ function renderHistory(){
     if(done===0) return;
     shown++;
     const allSession = done===total && judged>0 && rows.every(r=>!r.includes('fb keep')&&!r.includes('미완료'));
-    const verdict = done<total
+    const verdict = data.deload ? `<span class="vd warn">디로드</span>` : done<total
       ? `<span class="vd gray">중단됨</span>`
       : allSession ? `<span class="vd ok">전 종목 달성</span>` : `<span class="vd warn">일부 미달</span>`;
     const card = document.createElement('div');
@@ -702,7 +730,7 @@ function renderHistory(){
   view.appendChild(tools);
   document.getElementById('expBtn').onclick = ()=>{
     const dump = {};
-    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')).forEach(k=>dump[k]=store.get(k));
+    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')||k.startsWith('deload:')).forEach(k=>dump[k]=store.get(k));
     const blob = new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `쇠질로그_백업_${todayISO()}.json`; a.click();
@@ -1025,7 +1053,7 @@ window.addEventListener('pageshow', refreshDateIfStale);
 window.addEventListener('focus', refreshDateIfStale);
 
 // 프로그램 1주차 시작일 = 2026-08-24. 이후 5주 훈련 + 1주 디로드 사이클 표시
-const CYCLE_START = new Date('2026-08-24T00:00:00');
+const CYCLE_START = new Date('2026-08-31T00:00:00');  // 2026-11-15: 디로드 1주 순연 반영
 function weekInfo(){
   const now = new Date(curDate+'T00:00:00');
   const diff = Math.floor((now - CYCLE_START)/(7*24*3600*1000));
@@ -1034,7 +1062,18 @@ function weekInfo(){
   return pos===5 ? '디로드 주 — 중량 60%, 세트 절반' : `사이클 ${Math.floor(diff/6)+1} · ${pos+1}주차`;
 }
 const weekChip = document.getElementById('weekChip');
-function renderWeek(){ weekChip.textContent = weekInfo() }
+function renderWeek(){
+  weekChip.textContent = DELOAD.on ? '디로드 ON — 60% · 세트 절반' : weekInfo();
+  weekChip.classList.toggle('deload', DELOAD.on);
+  weekChip.setAttribute('aria-pressed', DELOAD.on?'true':'false');
+}
+weekChip.onclick = ()=>{
+  if(!DELOAD.on){
+    if(confirm('디로드 모드를 켤까요?\n모든 종목 중량이 60%(2.5kg 단위)로, 세트는 절반으로 표시됩니다.\n이월 중량은 그대로 보존되고 증량 판정은 쉽니다.')) setDeload(true);
+  } else {
+    if(confirm('디로드 모드를 끌까요? 정상 중량으로 돌아갑니다.')) setDeload(false);
+  }
+};
 dateInput.addEventListener('change', renderWeek);
 
 /* ══════════ 골프 샷 페이서 ══════════ */
