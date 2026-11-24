@@ -27,7 +27,7 @@
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   button,.chk,.grab,nav button,summary{touch-action:manipulation}
-  html{font-size:16px}
+  html{font-size:16px; overflow-anchor:none}
   body{
     margin:0; background:var(--bg); color:var(--ink);
     font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
@@ -38,8 +38,8 @@
     background:
       radial-gradient(900px 520px at -10% -10%, rgba(177,76,255,.22), transparent 60%),
       radial-gradient(720px 420px at 110% 110%, rgba(255,43,214,.14), transparent 60%);}
-  body::after{content:""; position:fixed; inset:0; z-index:200; pointer-events:none; mix-blend-mode:overlay;
-    background:repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 3px)}
+  body::after{content:""; position:fixed; inset:0; z-index:200; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px)}
   .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
 
   /* ── 상단 고정바 (스크롤 시 블러) ───── */
@@ -59,17 +59,27 @@
   }
   /* ── 헤더 ─────────────────────────── */
   header{padding:calc(20px + env(safe-area-inset-top)) 16px 8px; max-width:640px; margin:0 auto}
-  .brand{display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand .lockup{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .brand .hbtns{margin-left:auto; display:flex; gap:8px; flex:none}
   .brand h1{margin:0; line-height:1}
   .brand .logo{font-size:1.85rem; font-weight:900; font-style:italic; letter-spacing:-.045em; color:#fff;
     text-shadow:0 0 10px var(--pur), 0 0 28px rgba(177,76,255,.7)}
   .brand .logo u{text-decoration:none; color:var(--cyan); text-shadow:0 0 10px var(--cyan), 0 0 24px rgba(46,230,255,.6)}
   .brand .sub{color:var(--ink-faint); font-size:.8rem; font-weight:600; padding-bottom:6px}
-  .brand .tag{color:var(--ink-dim); font-style:italic; font-weight:700; font-size:.9rem; letter-spacing:-.01em; padding-bottom:11px; line-height:1; white-space:nowrap}
+  .brand .tag{color:var(--ink-dim); font-style:italic; font-weight:700; font-size:.8rem; letter-spacing:-.01em; line-height:1; white-space:nowrap; padding-left:2px}
   .brand .tag b{color:var(--lime); font-style:italic; text-shadow:0 0 8px rgba(200,255,58,.8)}
-  .golfbtn{margin-left:auto; min-width:var(--tap); min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
-    background:var(--panel); font-size:1.25rem; cursor:pointer; touch-action:manipulation; align-self:flex-end; margin-bottom:2px}
+  .golfbtn{min-width:var(--tap); min-height:var(--tap); border-radius:12px; border:1px solid var(--line);
+    background:var(--panel); font-size:1.25rem; cursor:pointer; touch-action:manipulation}
   .golfbtn:focus-visible{outline:2px solid var(--pur); outline-offset:2px}
+  .elbowbtn{filter:grayscale(1) opacity(.55)}
+  .elbowbtn.on{filter:none; border-color:var(--mag); box-shadow:0 0 14px rgba(255,43,214,.4), inset 0 0 12px rgba(255,43,214,.1)}
+  .deload-banner.elbow{background:rgba(255,43,107,.07); border-left-color:#ff2b6b}
+  .deload-banner.elbow b{color:#ff5c8a}
+  .ex.skipped{opacity:.55; background:var(--panel)}
+  .ex.skipped::before{background:var(--line)}
+  .ex.skipped .ex-head .order{color:var(--ink-faint); text-shadow:none}
+  .ex.skipped .cue{margin-bottom:14px}
 
   /* ── 샷 페이서 오버레이 ───────────────── */
   .golf{position:fixed; inset:0; z-index:60; background:var(--bg); display:flex; flex-direction:column;
@@ -344,9 +354,14 @@
 <div class="topbar" id="topbar">
 <header>
   <div class="brand">
-    <h1><span class="logo">쇠질<u>로그</u></span></h1>
-    <span class="tag">The Iron never <b>lies.</b></span>
-    <button class="golfbtn" id="golfBtn" type="button" aria-label="샷 페이서">⛳</button>
+    <div class="lockup">
+      <h1><span class="logo">쇠질<u>로그</u></span></h1>
+      <span class="tag">The Iron never <b>lies.</b></span>
+    </div>
+    <div class="hbtns">
+      <button class="golfbtn elbowbtn" id="elbowBtn" type="button" aria-label="팔꿈치 모드" aria-pressed="false">🩹</button>
+      <button class="golfbtn" id="golfBtn" type="button" aria-label="샷 페이서">⛳</button>
+    </div>
   </div>
   <div class="datebar">
     <input type="date" id="dateInput" aria-label="운동 날짜">
@@ -414,8 +429,8 @@ const PROGRAM = [
     {n:"플랫 벤치프레스", w:90, s:4, r:6, rest:180, cue:"하단 0.5초 정지. 전 세트 6회 달성 시 다음 주 +2.5kg", cueD:"하단 0.5초 정지, 바 경로 그대로. 가볍게 — RIR 4+, 증량 판정 없음", prog:2.5},
     {n:"인클라인 덤벨프레스", w:30, s:3, r:10, rest:120, cue:"RIR 2 — 한쪽 덤벨 무게 기준 · 마지막 세트 최대 12회", cueD:"한쪽 덤벨 무게 기준. 가동범위 끝까지, RIR 4+", prog:2, lastMin:12},
     {n:"시티드 딥 (해머)", w:40, s:3, r:8, rest:150, cue:"양쪽 합 원판 무게 기입. 팔꿈치 45도, 좌석 낮게. 돌아올 때 2초 · 마지막 세트 최대 10회", cueD:"양쪽 합 원판 무게 기입. 팔꿈치 45도, 좌석 낮게, 돌아올 때 2초. 가볍게", prog:5, lastMin:10},
-    {n:"사이드 레터럴 레이즈", w:9, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", cueD:"드랍세트 없음. 반동 없이 천천히, RIR 4+", prog:1, lastMin:18},
-    {n:"케이블 푸시다운", w:0, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2.5, lastMin:14},
+    {n:"사이드 레터럴 레이즈", w:9, elbow:{sub:{n:"사이드 레터럴 (손목 커프·케이블)", w:0, cue:"커프를 손목에 걸고 손은 쥐지 않기 — 그립 0. 커프 없으면 이 종목은 생략 · 마지막 세트 최대 18회"}}, s:4, r:15, rest:90, cue:"마지막 세트 후 무게 절반 드랍 +10회 · 마지막 세트 최대 18회", cueD:"드랍세트 없음. 반동 없이 천천히, RIR 4+", prog:1, lastMin:18},
+    {n:"케이블 푸시다운", w:0, elbow:{skip:"손목 신전근 등척 부하 — 삼두는 벤치·딥으로 충분"}, s:2, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2.5, lastMin:14},
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", cueD:"원판 가슴에 안고 천천히. 내려갈 때 2~3초, 가볍게", prog:2.5, lastMin:14, sync:"situp"}
    ]},
  { key:"wed", tab:"화", color:"var(--plate-yellow)", name:"당기기 A — 광배 특화 + 이두", time:"약 65분", timeD:"약 40분",
@@ -424,12 +439,12 @@ const PROGRAM = [
    warmMain:[{label:"T바",ex:"T바로우 (넓은 오버핸드)",kind:"plate"}],
    warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20~30초 → 밴드 랫풀 15회<br><b>T바:</b> 20×10 → 40×6 → 본세트",
    ex:[
-    {n:"와이드그립 풀업", w:0, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg · 마지막 세트 최대 10회", cueD:"어깨너비 1.5배. 디로드는 맨몸(0). 견갑 하강부터 시작, 천천히. RIR 4+", prog:5, bw:true, lastMin:10},
-    {n:"T바로우 (넓은 오버핸드)", w:60, s:4, r:8, rest:150, cue:"팔꿈치 45~60도 벌려 당기기, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입 · 마지막 세트 최대 10회", cueD:"팔꿈치 45~60도, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입, 가볍게", prog:5, lastMin:10},
-    {n:"랫풀다운 (뉴트럴그립)", w:0, s:2, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", cueD:"팔꿈치를 옆구리로 꽂기, 스트레치 느끼기. RIR 4+", prog:5, lastMin:12},
-    {n:"스트레이트암 풀다운", w:0, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", cueD:"팔꿈치 편 채 광배 스트레치 집중. 가볍게", prog:2.5, lastMin:18},
-    {n:"바벨컬 (EZ바)", w:30, s:3, r:8, rest:120, cue:"이두 메인 — 무겁게, 반동 없이. 팔꿈치 옆구리 고정, 하강 2초 · 마지막 세트 최대 10회", cueD:"반동 없이, 팔꿈치 옆구리 고정, 하강 2초. 가볍게 — RIR 4+", prog:2.5, lastMin:10},
-    {n:"프리처컬 (머신)", w:0, s:3, r:10, rest:90, cue:"겨드랑이를 패드 상단에, 팔꿈치는 회전축에. 올림 1초·꼭대기 1초·내림 2초, 바닥에서 완전히 펴지 않기 · 마지막 세트 최대 12회", cueD:"겨드랑이를 패드 상단에, 팔꿈치는 회전축에. 템포 1·1·2 유지, 가볍게", prog:2.5, lastMin:12}
+    {n:"와이드그립 풀업", w:0, elbow:{strap:"8자 스트랩"}, s:4, r:8, rest:150, cue:"어깨너비 1.5배. 추가 중량만 기입(맨몸=0). 4세트 모두 8회↑ 시 +5kg · 마지막 세트 최대 10회", cueD:"어깨너비 1.5배. 디로드는 맨몸(0). 견갑 하강부터 시작, 천천히. RIR 4+", prog:5, bw:true, lastMin:10},
+    {n:"T바로우 (넓은 오버핸드)", w:60, elbow:{strap:true}, s:4, r:8, rest:150, cue:"팔꿈치 45~60도 벌려 당기기, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입 · 마지막 세트 최대 10회", cueD:"팔꿈치 45~60도, 견갑 모아 1초 정지, 하강 2초. 원판 무게 기입, 가볍게", prog:5, lastMin:10},
+    {n:"랫풀다운 (뉴트럴그립)", w:0, elbow:{strap:true}, s:2, r:10, rest:120, cue:"팔꿈치를 옆구리로 꽂기 · 마지막 세트 최대 12회", cueD:"팔꿈치를 옆구리로 꽂기, 스트레치 느끼기. RIR 4+", prog:5, lastMin:12},
+    {n:"스트레이트암 풀다운", w:0, elbow:{skip:"팔꿈치 편 채 손목으로 버티는 종목 — 광배는 풀업·랫풀로 충분"}, s:3, r:15, rest:90, cue:"팔꿈치 편 채 광배 스트레치 집중 · 마지막 세트 최대 18회", cueD:"팔꿈치 편 채 광배 스트레치 집중. 가볍게", prog:2.5, lastMin:18},
+    {n:"바벨컬 (EZ바)", w:30, elbow:{light:"오른쪽 이두건 압통 — 가볍게, 통증 3/10 이내. 아프면 해머컬로 대체"}, s:3, r:8, rest:120, cue:"이두 메인 — 무겁게, 반동 없이. 팔꿈치 옆구리 고정, 하강 2초 · 마지막 세트 최대 10회", cueD:"반동 없이, 팔꿈치 옆구리 고정, 하강 2초. 가볍게 — RIR 4+", prog:2.5, lastMin:10},
+    {n:"프리처컬 (머신)", w:0, elbow:{light:"가볍게, 통증 3/10 이내"}, s:3, r:10, rest:90, cue:"겨드랑이를 패드 상단에, 팔꿈치는 회전축에. 올림 1초·꼭대기 1초·내림 2초, 바닥에서 완전히 펴지 않기 · 마지막 세트 최대 12회", cueD:"겨드랑이를 패드 상단에, 팔꿈치는 회전축에. 템포 1·1·2 유지, 가볍게", prog:2.5, lastMin:12}
    ]},
  { key:"thu", tab:"수", color:"var(--plate-green)", name:"밀기 B — 가슴 볼륨 + 어깨 + 복근", time:"약 65분 + 풋살 20–22시", timeD:"약 40분 + 풋살 20–22시",
    note:"풋살 전 상체 밀기 — 하체 영향 0. 17시 전 종료 → 18시 탄수화물 식사 → 풋살. 플라이는 큰 호를 그리기.",
@@ -438,10 +453,10 @@ const PROGRAM = [
    warm:"유산소 3분 → 암서클·풀어파트 → 푸시업 10회<br><b>인클라인:</b> 빈봉×10 → 50×5 → 65×3",
    ex:[
     {n:"인클라인 바벨프레스", w:80, s:4, r:8, rest:150, cue:"전 세트 8회 달성 시 +2.5kg", cueD:"하단 터치 후 바로 밀기, 견갑 고정. RIR 4+, 증량 판정 없음", prog:2.5},
-    {n:"디클라인 케이블 플라이", w:0, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", cueD:"하단 스트레치 0.5초 정지. 가볍게", prog:2.5, lastMin:14},
+    {n:"디클라인 케이블 플라이", w:0, elbow:{light:"손목 중립 유지, 손잡이 꽉 쥐지 않기"}, s:3, r:12, rest:90, cue:"하단 스트레치 0.5초 정지 · 마지막 세트 최대 14회", cueD:"하단 스트레치 0.5초 정지. 가볍게", prog:2.5, lastMin:14},
     {n:"체스트 플라이 머신 (gym80)", w:0, s:3, r:15, rest:90, cue:"수축 1초 정지 · 마지막 세트 최대 18회", cueD:"수축 1초 정지. 가볍게", prog:2.5, lastMin:18},
     {n:"덤벨 숄더프레스", w:0, s:3, r:10, rest:120, cue:"RIR 2 · 마지막 세트 최대 12회", cueD:"RIR 4+, 가동범위 끝까지", prog:2, lastMin:12},
-    {n:"사이드 레터럴 (케이블)", w:0, s:4, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", cueD:"가볍게, 반동 금지", prog:1, lastMin:18},
+    {n:"사이드 레터럴 (케이블)", w:0, elbow:{sub:{n:"사이드 레터럴 (손목 커프·케이블)", w:0, cue:"커프를 손목에 걸고 손은 쥐지 않기 — 그립 0. 커프 없으면 이 종목은 생략 · 마지막 세트 최대 18회"}}, s:4, r:15, rest:90, cue:"가볍게, 반동 금지 · 마지막 세트 최대 18회", cueD:"가볍게, 반동 금지", prog:1, lastMin:18},
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", cueD:"원판 가슴에 안고 천천히. 내려갈 때 2~3초, 가볍게", prog:2.5, lastMin:14, sync:"situp"}
    ]},
  { key:"fri", tab:"목", color:"var(--plate-white)", name:"당기기 B — 시티드로우 메인 · 후면 · 팔", time:"약 65분", timeD:"약 40분",
@@ -450,13 +465,13 @@ const PROGRAM = [
    warmMain:[{label:"시티드로우",ex:"시티드 케이블로우 (V바)",kind:"stack"}],
    warm:"유산소 3분 → 밴드 풀어파트 15×2 → 데드행 20초<br><b>시티드로우:</b> 스택 최하단×10 → 40kg×6 → 본세트",
    ex:[
-    {n:"시티드 케이블로우 (V바)", w:59, s:4, r:8, rest:150, cue:"세션 메인 — 무겁게. 상체 고정, 팔꿈치 옆구리 스치며 배꼽까지, 견갑 1초, 하강 2초. 마지막 세트 10회 후 여유 있으면 드랍 +8 · 마지막 세트 최대 10회", cueD:"드랍세트 없음. 상체 고정, 팔꿈치 옆구리 스치며 배꼽까지, 견갑 1초, 하강 2초. 가볍게", prog:5, lastMin:10},
-    {n:"원암 덤벨로우", w:0, s:3, r:10, rest:120, cue:"좌우 보정용. 각 팔 10회, 팔꿈치를 골반 쪽으로 · 마지막 세트 최대 12회", cueD:"각 팔 같은 횟수, 팔꿈치를 골반 쪽으로. 가볍게", prog:2, lastMin:12},
-    {n:"페이스풀", w:0, s:3, r:15, rest:90, cue:"가볍게, 팔꿈치가 손목보다 높게 · 마지막 세트 최대 18회", cueD:"가볍게, 팔꿈치가 손목보다 높게", prog:2.5, lastMin:18},
-    {n:"리어 델트 플라이", w:0, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", cueD:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기. 가볍게", prog:2, lastMin:18},
-    {n:"인클라인 덤벨컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2, lastMin:14},
-    {n:"해머컬", w:0, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2, lastMin:14},
-    {n:"오버헤드 익스텐션", w:0, s:3, r:12, rest:90, cue:"RIR 1. 컬과 슈퍼세트 가능 · 마지막 세트 최대 14회", cueD:"RIR 4+. 컬과 슈퍼세트 가능", prog:2.5, lastMin:14}
+    {n:"시티드 케이블로우 (V바)", w:59, elbow:{strap:true}, s:4, r:8, rest:150, cue:"세션 메인 — 무겁게. 상체 고정, 팔꿈치 옆구리 스치며 배꼽까지, 견갑 1초, 하강 2초. 마지막 세트 10회 후 여유 있으면 드랍 +8 · 마지막 세트 최대 10회", cueD:"드랍세트 없음. 상체 고정, 팔꿈치 옆구리 스치며 배꼽까지, 견갑 1초, 하강 2초. 가볍게", prog:5, lastMin:10},
+    {n:"원암 덤벨로우", w:0, elbow:{strap:true}, s:3, r:10, rest:120, cue:"좌우 보정용. 각 팔 10회, 팔꿈치를 골반 쪽으로 · 마지막 세트 최대 12회", cueD:"각 팔 같은 횟수, 팔꿈치를 골반 쪽으로. 가볍게", prog:2, lastMin:12},
+    {n:"페이스풀", w:0, elbow:{skip:"로프를 손목 신전으로 버티는 종목 — 후면은 리어델트 플라이로"}, s:3, r:15, rest:90, cue:"가볍게, 팔꿈치가 손목보다 높게 · 마지막 세트 최대 18회", cueD:"가볍게, 팔꿈치가 손목보다 높게", prog:2.5, lastMin:18},
+    {n:"리어 델트 플라이", w:0, elbow:{light:"손은 걸치기만, 팔꿈치로 벌리기"}, s:3, r:15, rest:60, cue:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기 · 마지막 세트 최대 18회", cueD:"펙덱 역방향 또는 덤벨. 팔꿈치 살짝 굽힌 채 뒤로 벌리기. 가볍게", prog:2, lastMin:18},
+    {n:"인클라인 덤벨컬", w:0, elbow:{light:"가볍게, 통증 3/10 이내"}, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2, lastMin:14},
+    {n:"해머컬", w:0, elbow:{light:"중립 그립이라 컬 중 가장 안전 — 통증 3/10 이내"}, s:3, r:12, rest:90, cue:"RIR 1 · 마지막 세트 최대 14회", cueD:"RIR 4+, 폼 유지", prog:2, lastMin:14},
+    {n:"오버헤드 익스텐션", w:0, elbow:{skip:"로프 그립 + 손목 신전 — 삼두는 밀기 종목으로 충분"}, s:3, r:12, rest:90, cue:"RIR 1. 컬과 슈퍼세트 가능 · 마지막 세트 최대 14회", cueD:"RIR 4+. 컬과 슈퍼세트 가능", prog:2.5, lastMin:14}
    ]},
  { key:"tue", tab:"금", color:"var(--plate-blue)", name:"하체 유지 + 어깨 측면 + 스프린트", time:"약 60분", timeD:"약 40분",
    note:"풋살까지 5일 — 하체 피로가 수요일에 끼어들지 않는 자리. 스쿼트 72% RIR 3 (무릎 아프면 스패니시 스쿼트 45초×5), 데드 2세트 145. 레터럴·외회전 가볍게(리어델트는 화요일로). 마지막에 가속 달리기 4본.",
@@ -464,13 +479,13 @@ const PROGRAM = [
    warmMain:[{label:"스쿼트",ex:"백스쿼트",kind:"bar"},{label:"데드",ex:"컨벤셔널 데드리프트",kind:"dead"}],
    warm:"자전거 3분 → 레그스윙 전후·좌우 각 10회 → 힙힌지 빈손 10회 → 맨몸 스쿼트 15회<br><b>스쿼트:</b> 빈봉×10 → 60×5 → 90×3 → 110×2<br><b>데드:</b> 60×5 → 100×3 → 125×1 (벨트)",
    ex:[
-    {n:"백스쿼트", w:125, s:3, r:5, rest:180, cue:"72%, RIR 3에서 정지. 증량 없음 — 3주 이상 가뿐하면 +2.5 수동 조정", cueD:"60% — 깊이·템포 점검용, RIR 5 이상. 무릎 신호 있으면 스패니시 스쿼트 45초×3으로 대체", prog:0},
-    {n:"컨벤셔널 데드리프트", w:145, s:2, r:5, rest:180, cue:"매주 2세트, RIR 3. 증량 없음 — 가뿐하면 3주 단위로 +2.5 수동 조정", cueD:"60%, 벨트 없이. 셋업·힙힌지 점검, RIR 5 이상", prog:0},
+    {n:"백스쿼트", w:125, elbow:{light:"바 잡을 때 손목 꺾지 않기 — 그립 넓게. 아프면 세이프티바"}, s:3, r:5, rest:180, cue:"72%, RIR 3에서 정지. 증량 없음 — 3주 이상 가뿐하면 +2.5 수동 조정", cueD:"60% — 깊이·템포 점검용, RIR 5 이상. 무릎 신호 있으면 스패니시 스쿼트 45초×3으로 대체", prog:0},
+    {n:"컨벤셔널 데드리프트", w:145, elbow:{strap:true}, s:2, r:5, rest:180, cue:"매주 2세트, RIR 3. 증량 없음 — 가뿐하면 3주 단위로 +2.5 수동 조정", cueD:"60%, 벨트 없이. 셋업·힙힌지 점검, RIR 5 이상", prog:0},
     {n:"레그컬", w:0, s:2, r:12, rest:90, cue:"펴지는 구간 3초 · 마지막 세트 최대 14회", cueD:"펴지는 구간 3초. 가볍게", prog:2.5, lastMin:14},
     {n:"스탠딩 카프레이즈", w:0, s:3, r:12, rest:60, cue:"꼭대기 1초 정지 · 마지막 세트 최대 14회", cueD:"꼭대기 1초 정지. 가볍게", prog:2.5, lastMin:14},
     {n:"디클라인 웨이티드 싯업", w:10, s:3, r:12, rest:60, cue:"원판 가슴에 안고, 등을 말아 올리기. 내려갈 때 2~3초 · 마지막 세트 최대 14회", cueD:"원판 가슴에 안고 천천히. 내려갈 때 2~3초, 가볍게", prog:2.5, lastMin:14, sync:"situp"},
-    {n:"케이블 사이드 레터럴", w:0, s:5, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", cueD:"드랍세트 없음. 가볍게, 반동 금지", prog:1, lastMin:18},
-    {n:"케이블 외회전", w:5, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", cueD:"각 팔 15회. 스택 최하단 그대로(감량 없음), 팔꿈치 옆구리 고정", prog:0, keepW:true},
+    {n:"케이블 사이드 레터럴", w:0, elbow:{sub:{n:"사이드 레터럴 (손목 커프·케이블)", w:0, cue:"커프를 손목에 걸고 손은 쥐지 않기 — 그립 0. 커프 없으면 이 종목은 생략 · 마지막 세트 최대 18회"}}, s:5, r:15, rest:75, cue:"어깨 미니 세션 시작. 마지막 세트 드랍 +10회 · 마지막 세트 최대 18회", cueD:"드랍세트 없음. 가볍게, 반동 금지", prog:1, lastMin:18},
+    {n:"케이블 외회전", w:5, elbow:{light:"가벼워서 대체로 괜찮음 — 통증 있으면 생략"}, s:2, r:15, rest:45, cue:"각 팔 15회. 팔꿈치 옆구리 고정, 스택 최하단. 여유 있어야 정상", cueD:"각 팔 15회. 스택 최하단 그대로(감량 없음), 팔꿈치 옆구리 고정", prog:0, keepW:true},
     {n:"가속 달리기 (러닝머신)", w:13, s:4, r:1, rest:60, cue:"각 15초, 속도 전환 중엔 손잡이 잡기. 60→75→85→90% 체감. 바닥 공간 있으면 30m 가속 달리기로 대체", cueD:"디로드는 2본만 — 각 15초, 60→75% 체감. 속도 전환 중엔 손잡이 잡기", prog:0, unit:"km/h", perSet:[13,14,14,15], noProg:true}
    ]}
 ];
@@ -534,7 +549,9 @@ function loadSession(dayKey){
   const raw = store.get(skey(curDate, dayKey));
   if(raw){ try{ return JSON.parse(raw) }catch(e){} }
   const day = PROGRAM.find(d=>d.key===dayKey);
-  return { ex: day.ex.map((e,i)=>{
+  return { ex: day.ex.map((e0,i)=>{
+    if(elbowSkip(e0)) return { w:0, sets:[], skipped:true };
+    const e = effEx(e0);
     if(e.noW) return { w:0, sets: e.s ? Array.from({length:e.s},()=>({r:null,done:false})) : [] };
     const cw = parseFloat(store.get(curKey(e)));
     let w = isNaN(cw) ? e.w : cw, sets = e.s;
@@ -543,8 +560,30 @@ function loadSession(dayKey){
       else if(!e.perSet && !e.keepW && w>0) w = deloadW(w);
       sets = Math.max(1, Math.ceil(e.s/2));            // 가속 달리기도 2본
     }
-    return { w, sets: Array.from({length:sets},()=>({r:null,done:false})), deload: DELOAD.on || undefined };
+    return { w, sets: Array.from({length:sets},()=>({r:null,done:false})), deload: DELOAD.on || undefined, n: e._sub ? e.n : undefined };
   }) };
+}
+/* ── 팔꿈치 모드: 외측상과염 보호 — skip(제외) / sub(대체 종목) / strap(스트랩) / light(가볍게) ── */
+const ELBOW = { on: store.get('elbow:on')==='1' };
+function effEx(e){ return (ELBOW.on && e.elbow && e.elbow.sub) ? Object.assign({}, e, e.elbow.sub, {_sub:true}) : e }
+function elbowSkip(e){ return ELBOW.on && e.elbow && e.elbow.skip }
+function elbowCue(ex, base){
+  if(!ELBOW.on || !ex.elbow) return base;
+  const el = ex.elbow;
+  if(el.strap) return `🩹 스트랩${typeof el.strap==='string'?` (${el.strap})`:''} — 손은 걸치기만, 그립 힘 빼기. ${base||''}`.trim();
+  if(el.light) return `🩹 ${el.light}. ${(base||'').replace(/(이두|세션) 메인 — 무겁게[,.] ?/,'')}`.trim();
+  if(el.sub)   return `🩹 ${base||''}`.trim();
+  return base;
+}
+function setElbow(on){
+  ELBOW.on = !!on; store.set('elbow:on', on?'1':'0');
+  PROGRAM.forEach(d=>{
+    const raw=store.get(skey(curDate,d.key)); if(!raw) return;
+    try{ const data=JSON.parse(raw); const touched=data.ex.some(x=>x.sets.some(st=>st.done)); if(!touched) store.del(skey(curDate,d.key)); }catch(e){}
+  });
+  document.getElementById('elbowBtn').classList.toggle('on', ELBOW.on);
+  document.getElementById('elbowBtn').setAttribute('aria-pressed', ELBOW.on?'true':'false');
+  renderView();
 }
 /* ── 디로드 모드: 이월 중량의 60%를 2.5kg 단위로 반올림, 세트 절반. 이월 중량은 건드리지 않음 ── */
 const DELOAD = { on: store.get('deload:on')==='1' };
@@ -578,6 +617,7 @@ function deloadWarm(day, data){
 }
 function saveSession(dayKey, data){
   if(DELOAD.on) data.deload=true;
+  if(ELBOW.on) data.elbow=true;
   store.set(skey(curDate, dayKey), JSON.stringify(data));
 }
 
@@ -598,17 +638,28 @@ function renderView(){
     <p class="daynote">${DELOAD.on ? (day.noteD||day.note) : day.note}</p>
     <details class="warm"><summary>워밍업${DELOAD.on?' (디로드 중량 기준)':''}</summary><div class="body">${DELOAD.on ? deloadWarm(day, data) : day.warm}</div></details>`;
   view.appendChild(head);
+  if(ELBOW.on){
+    const b=document.createElement('div'); b.className='deload-banner elbow';
+    b.innerHTML='<b>🩹 팔꿈치 모드</b> — 외측상과염 보호. 손목으로 버티는 종목은 제외·대체, 당기기는 스트랩, 컬은 가볍게. 기준: 운동 중 통증 3/10 이내 · 다음 날 아침 더 아프면 중단 · 프롤로 후 3~4일은 그립 부하 없음.';
+    view.insertBefore(b, head.nextSibling);
+  }
   if(DELOAD.on){
     const b=document.createElement('div'); b.className='deload-banner';
     b.innerHTML='<b>디로드 주간</b> — 중량 60%(2.5kg 단위) · 세트 절반 · 워밍업과 큐도 디로드 기준으로 표시. 증량 판정 없음, 이월 중량은 그대로. 주말에 상단 스위치로 끄세요.';
     view.insertBefore(b, head.nextSibling);
   }
 
-  day.ex.forEach((ex, xi)=>{
+  day.ex.forEach((ex0, xi)=>{
     const st = data.ex[xi];
     const card = document.createElement('section');
     card.className = 'ex';
     card.style.setProperty('--c', day.color);
+    if(st.skipped || elbowSkip(ex0)){
+      card.classList.add('skipped');
+      card.innerHTML = `<div class="ex-head"><span class="order num">${xi+1}</span><div><div class="name">${ex0.n}</div><div class="meta">🩹 팔꿈치 모드 — 이번 세션 제외</div></div></div><div class="cue">${ex0.elbow.skip}</div>`;
+      view.appendChild(card); return;
+    }
+    const ex = effEx(ex0);
 
     const restTxt = ex.rest>=60 ? `${Math.floor(ex.rest/60)}분${ex.rest%60?` ${ex.rest%60}초`:''}` : `${ex.rest}초`;
     card.innerHTML = `
@@ -620,7 +671,7 @@ function renderView(){
         </div>
         <div class="rest">휴식<b class="num">${restTxt}</b></div>
       </div>
-      ${(DELOAD.on ? (ex.cueD||ex.cue) : ex.cue) ? `<div class="cue">${DELOAD.on ? (ex.cueD||ex.cue) : ex.cue}</div>` : ''}
+      ${(()=>{ const c = elbowCue(ex, DELOAD.on ? (ex.cueD||ex.cue) : ex.cue); return c ? `<div class="cue">${c}</div>` : '' })()}
       <div class="sets"></div>
       <div class="prog num"></div>`;
 
@@ -665,9 +716,10 @@ function renderView(){
             startTimer(ex.rest, {ex:ex.n, done:si+1, next:`${nx+1}세트 · ${wTxt}${target}`, goText:`${wTxt}${target}`});
           } else {
             // 종목 완료 → 다음 종목까지 전환 휴식 (양쪽 종목의 휴식 처방 평균, 90초~3분)
-            const nextEx = day.ex[xi+1];
+            let ni = xi+1; while(ni<day.ex.length && (data.ex[ni].skipped || !data.ex[ni].sets.length)) ni++;
+            const nextEx = day.ex[ni] ? effEx(day.ex[ni]) : null;
             if(nextEx){
-              const nst = data.ex[xi+1];
+              const nst = data.ex[ni];
               let trans = Math.round((ex.rest + nextEx.rest)/2/15)*15;
               trans = Math.max(90, Math.min(180, trans));
               const nw = nst && nst.w>0 ? `${nst.w}kg × ` : (nextEx.bw ? '맨몸 × ' : '');
@@ -727,6 +779,7 @@ function renderView(){
     <b>보조 종목</b>: 마지막 세트를 표시된 상한까지 (상한 되면 멈춤). 상한 달성 시 자동 증량, 미달 시 유지<br>
     <b>하체(금)</b>: 유지 모드 — 스쿼트 125 / 데드 145 고정(RIR 3). 풋살까지 5일<br>
 
+    <b>팔꿈치 모드</b>(상단 🩹): 레터럴 → 손목 커프 · 푸시다운/스트레이트암/페이스풀/OH익스텐션 제외 · 당기기 스트랩 · 컬 가볍게 · 통증 3/10 이내<br>
     <b>디로드</b>: 5주 훈련 + 1주 — 중량 60%(2.5kg 단위) · 세트 절반 · 풀업 맨몸 · 외회전 유지 · 가속 달리기 2본 · 드랍세트 없음 · 증량 판정 없음. 상단 스위치로 켜고 끔<br>
     영양: 평일 3,200kcal · 수 3,800kcal · 단백질 160g · 수면 7시간+`;
   view.appendChild(rules);
@@ -783,7 +836,7 @@ function renderHistory(){
         judged++;
         badge = `<span class="fb keep">${wTxt} 유지</span>`;
       }
-      rows.push(`<div class="hrow"><span class="hname">${ex.n}</span><span class="hres num">${wTxt?wTxt+' · ':''}${reps}</span>${badge}</div>`);
+      rows.push(`<div class="hrow"><span class="hname">${st.n||ex.n}</span><span class="hres num">${wTxt?wTxt+' · ':''}${reps}</span>${badge}</div>`);
     });
     if(done===0) return;
     shown++;
@@ -795,7 +848,7 @@ function renderHistory(){
     card.className='histcard'; card.style.setProperty('--c', day.color);
     card.innerHTML = `
       <div class="top"><span class="dot"></span>${day.name}<span class="d num">${date}</span></div>
-      <div class="hstats num">완료 ${done}/${total} 세트 · 볼륨 ${vol.toLocaleString()}kg ${verdict}</div>
+      <div class="hstats num">완료 ${done}/${total} 세트 · 볼륨 ${vol.toLocaleString()}kg ${verdict}${data.elbow?' <span class="vd gray">🩹 팔꿈치</span>':''}</div>
       <div class="hrows">${rows.join('')}</div>
       <button class="del">이 기록 삭제</button>`;
     card.querySelector('.del').onclick = async ()=>{
@@ -812,7 +865,7 @@ function renderHistory(){
   view.appendChild(tools);
   document.getElementById('expBtn').onclick = ()=>{
     const dump = {};
-    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')||k.startsWith('deload:')).forEach(k=>dump[k]=store.get(k));
+    store.keys().filter(k=>k.startsWith('log:')||k.startsWith('cur:')||k.startsWith('migrated:')||k.startsWith('deload:')||k.startsWith('elbow:')).forEach(k=>dump[k]=store.get(k));
     const blob = new Blob([JSON.stringify(dump,null,1)],{type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `쇠질로그_백업_${todayISO()}.json`; a.click();
@@ -1183,6 +1236,22 @@ weekChip.onclick = async ()=>{
     if(ok) setDeload(false);
   }
 };
+const elbowBtn = document.getElementById('elbowBtn');
+elbowBtn.classList.toggle('on', ELBOW.on); elbowBtn.setAttribute('aria-pressed', ELBOW.on?'true':'false');
+elbowBtn.onclick = async ()=>{
+  if(!ELBOW.on){
+    const ok = await askDialog({ icon:'🩹', tone:'red', title:'팔꿈치 모드 켜기',
+      body:'외측상과염 보호 모드입니다. 손목 신전근과 강한 그립에 부하가 가는 종목을 걸러냅니다.',
+      items:['사이드 레터럴 → <b>손목 커프</b> 버전으로 대체','푸시다운·스트레이트암·페이스풀·OH익스텐션 <b>제외</b>','풀업·로우·데드 <b>스트랩</b>, 컬은 가볍게','기준: 통증 <b>3/10 이내</b>, 다음 날 더 아프면 중단'],
+      ok:'모드 켜기', okTone:'danger' });
+    if(ok) setElbow(true);
+  } else {
+    const ok = await askDialog({ icon:'✓', tone:'green', title:'팔꿈치 모드 끄기',
+      body:'원래 종목 구성으로 돌아갑니다. 레터럴·푸시다운 등은 가벼운 중량부터 다시 시작하세요.',
+      ok:'정상 복귀' });
+    if(ok) setElbow(false);
+  }
+};
 dateInput.addEventListener('change', renderWeek);
 
 /* ══════════ 골프 샷 페이서 ══════════ */
@@ -1242,9 +1311,16 @@ dateInput.addEventListener('change', renderWeek);
 /* ══════════ 상단바 스크롤 상태 ══════════ */
 const topbar=document.getElementById('topbar');
 let tbTick=false;
+/* 히스테리시스: 접힘 80px↑ / 펴짐 10px↓ — 간격(70px)이 날짜줄 높이(~58px)보다 커야
+   접힘으로 생기는 스크롤 보정이 반대 기준을 넘지 못해 진동하지 않는다 */
 function onScroll(){
   if(tbTick) return; tbTick=true;
-  requestAnimationFrame(()=>{ topbar.classList.toggle('scrolled', window.scrollY>24); tbTick=false });
+  requestAnimationFrame(()=>{
+    const y=window.scrollY, on=topbar.classList.contains('scrolled');
+    if(!on && y>80) topbar.classList.add('scrolled');
+    else if(on && y<10) topbar.classList.remove('scrolled');
+    tbTick=false;
+  });
 }
 window.addEventListener('scroll', onScroll, {passive:true});
 onScroll();
